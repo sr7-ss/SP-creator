@@ -1,0 +1,278 @@
+import { Locale } from '@/types';
+
+export const translations: Record<Locale, Record<string, string>> = {
+  en: {
+    // Navigation
+    'nav.home': 'Start',
+    'nav.projects': 'My Products',
+    'nav.knowledge': 'Knowledge Base',
+    'nav.reviews': 'Review Analysis',
+    'nav.research': 'Deep Research',
+    'nav.settings': 'Settings',
+    'reviews.title': 'Review Analysis',
+    'reviews.upload': 'Upload Reviews',
+    'reviews.uploadDesc': 'Upload a CSV or Excel file containing user reviews',
+    'reviews.dragDrop': 'Drag & drop or click to upload',
+    'reviews.supportedFormats': 'Supported: CSV, XLS, XLSX',
+    'reviews.selectColumn': 'Select review column',
+    'reviews.analyze': 'Analyze Reviews',
+    'reviews.analyzing': 'Analyzing...',
+    'reviews.summary': 'Summary',
+    'reviews.positive': 'Positive',
+    'reviews.negative': 'Negative',
+    'reviews.neutral': 'Neutral',
+    'reviews.dimensions': 'Dimension Distribution',
+    'reviews.reviewCards': 'Individual Reviews',
+    'reviews.sentiment': 'Sentiment',
+    'reviews.highlights': 'Highlights',
+    'reviews.noResults': 'No analysis results yet. Upload a file to get started.',
+    'reviews.totalReviews': 'Total Reviews',
+    'reviews.parseError': 'Failed to parse file',
+    'reviews.batchProgress': 'Analyzing batch {current} of {total}...',
+    'reviews.all': 'All',
+    'reviews.fileLoaded': '{count} reviews loaded from {file}',
+
+    // Home
+    'home.title': 'Welcome to KSP Packaging Assistant',
+    'home.subtitle': 'Quickly create compelling selling points for your products',
+    'home.newProject': 'Create your first project \u2192',
+    'home.recentProjects': 'Recent Projects',
+    'home.timeAgo.justNow': 'just now',
+    'home.timeAgo.minutesAgo': '{n} minutes ago',
+    'home.timeAgo.hoursAgo': '{n} hours ago',
+    'home.timeAgo.daysAgo': '{n} days ago',
+
+    // Project
+    'project.name': 'Project Name',
+    'project.segment': 'Price Segment',
+    'project.market': 'Target Market',
+    'project.create': 'Create Project',
+    'project.delete': 'Delete',
+    'project.noProjects': 'No projects yet. Create your first project.',
+
+    // Param Table
+    'param.addRow': 'Add Row',
+    'param.addProduct': 'Add Product',
+    'param.parameter': 'Parameter',
+    'param.ownProduct': 'Own Product',
+    'param.competitor': 'Competitor',
+
+    'param.smartPaste': 'Smart Paste',
+    'param.inputParams': 'Input Params',
+    'param.manualInput': 'Manual Input',
+    'param.pasteImage': 'Paste Image',
+    'param.smartPasteDesc': 'Paste text or upload an image, AI will auto-fill the table',
+    'param.pasteText': 'Paste parameter text here...',
+    'param.uploadImage': 'Upload Image',
+    'param.parsing': 'AI Parsing...',
+    'param.parse': 'AI Parse',
+
+    // Compare
+    'compare.title': 'Parameter Comparison',
+    'compare.analyze': 'AI Analyze',
+    'compare.analyzing': 'Analyzing...',
+    'compare.advantages': 'Advantages',
+    'compare.disadvantages': 'Disadvantages',
+    'compare.neutral': 'Neutral',
+
+    // KSP
+    'ksp.title': 'KSP Tiering',
+    'ksp.generate': 'AI Generate KSP',
+    'ksp.generating': 'Generating...',
+    'ksp.tier1': 'Tier 1 - Core',
+    'ksp.tier2': 'Tier 2 - Important',
+    'ksp.tier3': 'Tier 3 - Basic',
+
+    // Packaging
+    'packaging.title': 'Selling Point Packaging',
+    'packaging.generate': 'AI Generate Packaging',
+    'packaging.generating': 'Generating...',
+    'packaging.l1': 'Feature Name',
+    'packaging.l2': 'Slogan',
+    'packaging.l3': 'Sub-points',
+    'packaging.sloganType.factual': 'Factual',
+    'packaging.sloganType.functional': 'Functional Value',
+    'packaging.sloganType.emotional': 'Emotional Value',
+    'packaging.regenerate': 'Regenerate',
+
+    // Knowledge
+    'knowledge.title': 'Knowledge Base',
+    'knowledge.add': 'Add Entry',
+    'knowledge.category': 'Category',
+    'knowledge.brand': 'Brand',
+    'knowledge.content': 'Content',
+    'knowledge.noEntries': 'No knowledge entries yet.',
+
+    // Settings
+    'settings.title': 'Settings',
+    'settings.aiProvider': 'AI Provider',
+    'settings.apiKey': 'API Key',
+    'settings.model': 'Model',
+    'settings.save': 'Save',
+    'settings.saved': 'Settings saved',
+    'settings.language': 'Language',
+    'settings.providerKeys': 'API Key Configuration',
+    'settings.notConfigured': 'Not configured',
+    'settings.advancedRouting': 'Advanced Routing',
+    'settings.routingDescription': 'Assign different AI providers to different task types for cost optimization',
+    'settings.taskLight': 'Light Tasks',
+    'settings.taskLightDesc': 'Param recognition, Agent orchestration',
+    'settings.taskAnalysis': 'Analysis',
+    'settings.taskAnalysisDesc': 'Competitive analysis, KSP grading',
+    'settings.taskResearch': 'Deep Research',
+    'settings.taskResearchDesc': 'Market research, review crawling (multi-turn Agent, high token usage)',
+    'settings.taskCreative': 'Creative Output',
+    'settings.taskCreativeDesc': 'Selling point packaging',
+    'settings.routingDefault': 'Default (active provider)',
+
+    // Model Selector
+    'model.noApiKey': 'No API key configured',
+
+    // Common
+    'common.save': 'Save',
+    'common.cancel': 'Cancel',
+    'common.edit': 'Edit',
+    'common.delete': 'Delete',
+    'common.loading': 'Loading...',
+    'common.export': 'Export',
+  },
+  zh: {
+    // Navigation
+    'nav.home': '开始',
+    'nav.projects': '我的产品',
+    'nav.knowledge': '知识库',
+    'nav.reviews': '评论分析',
+    'nav.research': 'Deep Research',
+    'nav.settings': '设置',
+    'reviews.title': '评论分析',
+    'reviews.upload': '上传评论',
+    'reviews.uploadDesc': '上传包含用户评论的 CSV 或 Excel 文件',
+    'reviews.dragDrop': '拖拽或点击上传',
+    'reviews.supportedFormats': '支持格式：CSV、XLS、XLSX',
+    'reviews.selectColumn': '选择评论列',
+    'reviews.analyze': '开始分析',
+    'reviews.analyzing': '分析中...',
+    'reviews.summary': '分析摘要',
+    'reviews.positive': '正面',
+    'reviews.negative': '负面',
+    'reviews.neutral': '中性',
+    'reviews.dimensions': '维度分布',
+    'reviews.reviewCards': '评论详情',
+    'reviews.sentiment': '情感',
+    'reviews.highlights': '关键词',
+    'reviews.noResults': '暂无分析结果。上传文件开始分析。',
+    'reviews.totalReviews': '评论总数',
+    'reviews.parseError': '文件解析失败',
+    'reviews.batchProgress': '正在分析第 {current} / {total} 批...',
+    'reviews.all': '全部',
+    'reviews.fileLoaded': '已从 {file} 加载 {count} 条评论',
+
+    // Home
+    'home.title': '欢迎使用卖点包装助手',
+    'home.subtitle': '快速为你的产品创建有说服力的卖点',
+    'home.newProject': '创建第一个项目 \u2192',
+    'home.recentProjects': '最近项目',
+    'home.timeAgo.justNow': '刚刚',
+    'home.timeAgo.minutesAgo': '{n}分钟前',
+    'home.timeAgo.hoursAgo': '{n}小时前',
+    'home.timeAgo.daysAgo': '{n}天前',
+
+    // Project
+    'project.name': '项目名称',
+    'project.segment': '价位段',
+    'project.market': '目标市场',
+    'project.create': '创建项目',
+    'project.delete': '删除',
+    'project.noProjects': '暂无项目，创建你的第一个项目。',
+
+    // Param Table
+    'param.addRow': '添加行',
+    'param.addProduct': '添加产品',
+    'param.parameter': '参数',
+    'param.ownProduct': '自家产品',
+    'param.competitor': '竞品',
+
+    'param.smartPaste': '智能粘贴',
+    'param.inputParams': '输入参数',
+    'param.manualInput': '手动输入',
+    'param.pasteImage': '粘贴图片',
+    'param.smartPasteDesc': '粘贴文本或上传图片，AI自动识别填入表格',
+    'param.pasteText': '在此粘贴参数文本...',
+    'param.uploadImage': '上传图片',
+    'param.parsing': 'AI 识别中...',
+    'param.parse': 'AI 识别',
+
+    // Compare
+    'compare.title': '参数对比',
+    'compare.analyze': 'AI 分析',
+    'compare.analyzing': '分析中...',
+    'compare.advantages': '优势',
+    'compare.disadvantages': '劣势',
+    'compare.neutral': '持平',
+
+    // KSP
+    'ksp.title': '卖点分级',
+    'ksp.generate': 'AI 生成 KSP',
+    'ksp.generating': '生成中...',
+    'ksp.tier1': 'T1 - 核心卖点',
+    'ksp.tier2': 'T2 - 重要卖点',
+    'ksp.tier3': 'T3 - 基础卖点',
+
+    // Packaging
+    'packaging.title': '卖点包装',
+    'packaging.generate': 'AI 生成包装',
+    'packaging.generating': '生成中...',
+    'packaging.l1': '卖点名',
+    'packaging.l2': 'Slogan',
+    'packaging.l3': '子卖点拆解',
+    'packaging.sloganType.factual': '写实型',
+    'packaging.sloganType.functional': '功能价值型',
+    'packaging.sloganType.emotional': '情绪价值型',
+    'packaging.regenerate': '重新生成',
+
+    // Knowledge
+    'knowledge.title': '知识库',
+    'knowledge.add': '添加条目',
+    'knowledge.category': '分类',
+    'knowledge.brand': '品牌',
+    'knowledge.content': '内容',
+    'knowledge.noEntries': '暂无知识库条目。',
+
+    // Settings
+    'settings.title': '设置',
+    'settings.aiProvider': 'AI 提供商',
+    'settings.apiKey': 'API Key',
+    'settings.model': '模型',
+    'settings.save': '保存',
+    'settings.saved': '设置已保存',
+    'settings.language': '语言',
+    'settings.providerKeys': 'API Key 配置',
+    'settings.notConfigured': '未配置',
+    'settings.advancedRouting': '高级路由',
+    'settings.routingDescription': '为不同任务类型分配不同的AI模型，优化成本',
+    'settings.taskLight': '轻量任务',
+    'settings.taskLightDesc': '参数识别、Agent 编排',
+    'settings.taskAnalysis': '核心分析',
+    'settings.taskAnalysisDesc': '竞品分析、卖点分级',
+    'settings.taskResearch': 'Deep Research',
+    'settings.taskResearchDesc': '市场调研、爬评论（多轮 Agent，Token 消耗高）',
+    'settings.taskCreative': '创意输出',
+    'settings.taskCreativeDesc': '卖点包装',
+    'settings.routingDefault': '默认（当前活跃模型）',
+
+    // Model Selector
+    'model.noApiKey': '未配置 API Key',
+
+    // Common
+    'common.save': '保存',
+    'common.cancel': '取消',
+    'common.edit': '编辑',
+    'common.delete': '删除',
+    'common.loading': '加载中...',
+    'common.export': '导出',
+  },
+};
+
+export function t(key: string, locale: Locale): string {
+  return translations[locale]?.[key] || key;
+}

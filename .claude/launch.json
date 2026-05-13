@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ksp-dev",
+      "runtimeExecutable": "/Users/sergio/.nvm/versions/node/v24.13.0/bin/node",
+      "runtimeArgs": ["/Users/sergio/Documents/ksp-assistant/node_modules/.bin/next", "dev"],
+      "port": 3000,
+      "autoPort": false,
+      "cwd": "/Users/sergio/Documents/ksp-assistant"
+    }
+  ]
+}

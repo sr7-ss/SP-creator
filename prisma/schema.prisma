@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ─── Auth Models (NextAuth.js v5) ────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  phone         String?   @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  plan          String    @default("free") // "free" | "pro" | "enterprise"
+  credits       Int       @default(50)
+  creditsResetAt DateTime @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts           Account[]
+  sessions           Session[]
+  projects           Project[]
+  knowledge          Knowledge[]
+  aiKeys             UserAIKey[]
+  usageLogs          UsageLog[]
+  spTemplates        SellingPointTemplate[]
+  knowledgeEntries   KnowledgeEntry[]
+  researchReports    ResearchReport[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SmsVerification {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expires   DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([phone, code])
+}
+
+// ─── Business Models ─────────────────────────────────────────
+
+model Project {
+  id         String    @id @default(cuid())
+  name       String
+  segment    String?
+  market     String?
+  launched       Boolean   @default(false)
+  launchDate     DateTime?
+  targetAudience String?   // e.g. "18-25岁游戏玩家"
+  productStyle   String?   // JSON array e.g. '["科技感","年轻潮酷"]'
+  positioning    String?   // e.g. "主打游戏性能的中低价位手机"
+  packagingStrategy String? // e.g. "value-for-money" | "premium" | "tech-flagship" (see slogan-strategies.ts)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  products        Product[]
+  kspResults      KspResult[]
+  kspVersions     KspVersion[]
+  analyses        Analysis[]
+  reviewBatches   ReviewBatch[]
+  researchReports ResearchReport[]
+
+  @@index([userId])
+}
+
+model Product {
+  id           String  @id @default(cuid())
+  projectId    String
+  name         String
+  isOwnProduct Boolean @default(false)
+  params       Json    // Record<string, string>
+  sourceUrl    String? // spec page URL (GSMArena, 91mobiles, etc.)
+  sortOrder    Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Analysis {
+  id        String   @id @default(cuid())
+  projectId String
+  result    Json     // CompetitiveAnalysis
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model KspResult {
+  id           String  @id @default(cuid())
+  projectId    String
+  tier         Int
+  featureName  String
+  paramValue   String  @default("")
+  leadLevel    String?  // strong_lead | slight_lead | neutral | slight_lag | strong_lag
+  l1Name       String?
+  l2Slogan     String?
+  l2SloganType    String?
+  l2Alternatives  Json?   // SloganAlternative[] — {text, type}[]
+  l3Details       Json?   // L3SubPoint[]
+  sortOrder       Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Knowledge {
+  id         String   @id @default(cuid())
+  category   String
+  brand      String?
+  content    String
+  structured Json?    // structured packaging data
+  createdAt  DateTime @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Selling Point Templates ─────────────────────────────────
+
+model SellingPointTemplate {
+  id            String   @id @default(cuid())
+  userId        String
+  matchFeatures Json     // string[] — KSP feature names that trigger this template, e.g. ["电池","快充"]
+  parentName    String   // marketing name, e.g. "8000mAh Titan Battery + 45W Fast Charge"
+  parentSlogan  String?  // overall slogan
+  subFeatures   Json     // { name: string, fromFeature?: string }[] — ordered sub-selling-points
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Knowledge Base (structured) ─────────────────────────────
+
+model KnowledgeEntry {
+  id            String   @id @default(cuid())
+  userId        String
+  feature       String   // selling point name, e.g. "续航", "电池", "屏幕"
+  parentFeature String?  // parent group, e.g. "电池" for sub-feature "续航"
+  entryType     String   // "packaging" | "competitor" | "rule"
+  title         String
+  content       String   @db.Text
+  brand         String?  // brand tag, e.g. "realme", "vivo"
+  sourceUrl     String?  // competitor website URL if applicable
+  structured    Json?    // structured L1/L2/L3 data
+  tags          Json?    // string[] for flexible filtering
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, feature])
+  @@index([userId, parentFeature])
+}
+
+// ─── KSP Version Snapshots ──────────────────────────────────
+
+model KspVersion {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String   // e.g. "方案A：主打续航"
+  snapshot  Json     // KspItem[] snapshot
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─── Deep Research Reports ───────────────────────────────────
+
+model ResearchReport {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  query     String   @db.Text  // user's original research prompt
+  summary   String   @db.Text
+  insights  Json?    // ResearchInsight[]
+  messaging Json?    // CompetitorMessagingItem[]
+  recommendations Json? // string[]
+  sources   Json?    // { url, type, snippetCount }[]
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+}
+
+// ─── Review Analysis ─────────────────────────────────────────
+
+model ReviewBatch {
+  id         String   @id @default(cuid())
+  projectId  String
+  fileName   String
+  totalCount Int
+  status     String   @default("pending") // pending | processing | completed | failed
+  summary    Json?    // { positive, negative, neutral, dimensions }
+  createdAt  DateTime @default(now())
+
+  project Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  items   ReviewItem[]
+
+  @@index([projectId])
+}
+
+model ReviewItem {
+  id         String  @id @default(cuid())
+  batchId    String
+  text       String
+  sentiment  String  // positive | negative | neutral
+  score      Float?  // -1.0 to 1.0
+  dimensions Json?   // string[]
+  highlights Json?   // string[]
+
+  batch ReviewBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([batchId])
+}
+
+// ─── AI Key Storage ──────────────────────────────────────────
+
+model UserAIKey {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String   // "claude" | "openai" | "gemini" | "minimax" | "zhipu"
+  encryptedKey String
+  model        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+// ─── Usage Tracking ──────────────────────────────────────────
+
+model UsageLog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // "ai_parse_params" | "ai_packaging" | etc.
+  provider     String
+  model        String
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  creditsUsed  Int      @default(1)
+  durationMs   Int?     // wall-clock time for the API call
+  status       String   @default("success") // "success" | "failure"
+  errorMsg     String?  @db.Text
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+}
+
+// ─── Behavior Tracking ───────────────────────────────────────
+// Server-recorded events for the developer dashboard. Never contains
+// user-generated content — only event names + bounded metadata.
+// Privacy mode users are skipped on the client side.
+
+model TrackEvent {
+  id        String   @id @default(cuid())
+  userId    String?  // nullable: anonymous events allowed
+  sessionId String   // client-generated, rotates per visit
+  name      String   // e.g. "page_view" | "project_created" | "ai_packaging_started"
+  path      String?  // path of the page when fired
+  props     Json?    // bounded, non-content metadata (durationMs, count, status)
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([userId, createdAt])
+  @@index([sessionId])
+}

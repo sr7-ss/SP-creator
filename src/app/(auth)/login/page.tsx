@@ -52,7 +52,7 @@ export default function LoginPage() {
               <polygon points="12,2 22,20 2,20" />
             </svg>
           </div>
-          <h1 className="text-xl font-bold text-slate-900">KSP Assistant</h1>
+          <h1 className="text-xl font-bold text-slate-900">SP Creator</h1>
           <p className="text-xs text-slate-500 mt-1">产品卖点包装助手</p>
         </div>
 

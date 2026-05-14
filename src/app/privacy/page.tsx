@@ -259,8 +259,8 @@ export default function PrivacyPage() {
           {zh
             ? '有问题或发现和此页不一致的情况？'
             : 'Questions, or something on this page does not match reality?'}{' '}
-          <a href="mailto:privacy@ksp-assistant.app" className="underline hover:text-slate-700">
-            privacy@ksp-assistant.app
+          <a href="mailto:privacy@sp-creator.app" className="underline hover:text-slate-700">
+            privacy@sp-creator.app
           </a>
         </p>
       </div>

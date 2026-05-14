@@ -95,7 +95,7 @@ export default function HomePage() {
             </span>
           </div>
           <h1 className="font-syne text-[52px] font-[800] leading-[1.05] text-[#1e2a3a] mb-3">
-            KSP Assistant
+            SP Creator
           </h1>
           <p className="text-sm text-[#1e2a3a]/40">
             {zh ? 'AI驱动的产品卖点策划引擎' : 'AI-powered selling point planning engine'}

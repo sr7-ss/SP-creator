@@ -49,7 +49,7 @@ export default function Sidebar({ width }: { width?: number }) {
           </svg>
         </div>
         <div className="flex flex-col">
-          <span className="text-[15px] font-bold text-[#1e2a3a] tracking-[0.3px]">KSP Assistant</span>
+          <span className="text-[15px] font-bold text-[#1e2a3a] tracking-[0.3px]">SP Creator</span>
           <span className="font-space text-[9px] text-[#99a5b4] tracking-[1.5px] uppercase">Selling Point Tool</span>
         </div>
       </div>

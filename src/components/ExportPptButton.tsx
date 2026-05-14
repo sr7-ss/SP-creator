@@ -64,7 +64,7 @@ export default function ExportPptButton({ projectName, segment, kspItems, analys
           fontSize: 18, fontFace: 'Arial', color: '94A3B8',
         }
       );
-      titleSlide.addText(`KSP Assistant | ${new Date().toLocaleDateString()}`, {
+      titleSlide.addText(`SP Creator | ${new Date().toLocaleDateString()}`, {
         x: 0.8, y: 6.5, w: 11.7, h: 0.4,
         fontSize: 11, fontFace: 'Arial', color: '64748B',
       });

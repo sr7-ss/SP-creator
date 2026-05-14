@@ -1,4 +1,4 @@
-# KSP Assistant — AI 驱动的手机卖点策划引擎
+# SP Creator — AI 驱动的手机卖点策划引擎
 
 ## 产品定位
 

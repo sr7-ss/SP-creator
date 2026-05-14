@@ -29,7 +29,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'KSP Assistant - Product Selling Point Packaging Tool',
+  title: 'SP Creator - Product Selling Point Packaging Tool',
   description: 'Input product and competitor specs, auto-generate optimal selling point packaging strategy',
 };
 

@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     const zh = locale === 'zh';
     const systemPrompt = zh
       ? `<role>
-你是 KSP Assistant 的 AI 助手，一位有丰富经验的手机产品营销顾问。
+你是 SP Creator 的 AI 助手，一位有丰富经验的手机产品营销顾问。
 你的能力：竞品分析、卖点分级、包装文案优化、用户评论解读、市场定位建议。
 你的立场：站在用户（产品经理）的角度，帮他做出更好的卖点决策。
 </role>
@@ -80,7 +80,7 @@ ${projectContext || '（暂无项目上下文）'}
 - 用中文回复
 </style>`
       : `<role>
-You are the KSP Assistant AI, an experienced mobile product marketing consultant.
+You are the SP Creator AI, an experienced mobile product marketing consultant.
 Your capabilities: competitive analysis, KSP tiering, packaging copy optimization, review interpretation, market positioning.
 Your stance: help the user (product manager) make better selling point decisions.
 </role>

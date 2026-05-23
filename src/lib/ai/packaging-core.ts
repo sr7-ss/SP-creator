@@ -154,10 +154,12 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
       take: 50,
     });
 
-    // 1. Brand naming rules (brand_name type): "电池必须叫青海湖电池"
+    // 1. Brand naming rules (brand_name type): "电池：青海湖电池"
+    //    Format: <feature>：<marketingName>. Model is instructed (via <规则> L1 section)
+    //    to combine it with the actual paramValue when generating L1 names.
     const brandNameEntries = allEntries
-      .filter(e => e.entryType === 'brand_name' && isRelevant(e.feature))
-      .map(e => `${e.feature}的营销名必须使用：${e.title || e.content}`);
+      .filter(e => e.entryType === 'brand_name' && isRelevant(e.feature) && e.marketingName)
+      .map(e => `${e.feature}：${e.marketingName}`);
 
     // 2. General rules (rule type): "禁止用极限词"
     const ruleEntries = allEntries

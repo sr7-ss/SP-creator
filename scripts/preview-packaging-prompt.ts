@@ -10,7 +10,7 @@ const strategyKey = strategyArg ? strategyArg.split('=')[1] : DEFAULT_STRATEGY_K
 console.log(`Using strategy: ${strategyKey}\n`);
 
 const systemPrompt = getPackagingSystemPrompt('zh', [
-  '电池的营销名必须使用：青海湖电池',
+  '电池：青海湖电池',
 ]);
 
 const rawItems = [

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen, Plus, ChevronRight, ChevronDown, Pencil, Trash2, ExternalLink,
-  FolderOpen, FileText, Globe, Ruler, X, Check, Loader2,
+  FolderOpen, FileText, Globe, Ruler, X, Check, Loader2, HelpCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,13 @@ import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { TEMPLATE_DEFAULTS } from '@/lib/constants/template-defaults';
+import { PARAM_DISPLAY_NAMES } from '@/lib/analysis/direction-map';
 import * as kb from '@/lib/repos/knowledge';
+
+// Common features for brand_name dropdown (sourced from PARAM_DISPLAY_NAMES, deduplicated)
+const COMMON_FEATURES_ZH = Array.from(new Set(
+  Object.values(PARAM_DISPLAY_NAMES).map(v => v.zh)
+)).filter(Boolean);
 
 // ─── Types ─────────────────────────────────────────────────────
 
@@ -33,6 +39,7 @@ interface KnowledgeEntry {
   content: string;
   brand: string | null;
   sourceUrl: string | null;
+  marketingName: string | null;
   structured: unknown;
   createdAt: string;
 }
@@ -226,9 +233,24 @@ export default function KnowledgePage() {
 
   const saveEntry = async () => {
     if (!editingEntry) return;
+
+    // brand_name validation + auto-sync title to marketingName for list display
+    let payload = editingEntry;
+    if (editingEntry.entryType === 'brand_name') {
+      if (!editingEntry.feature || !editingEntry.marketingName) {
+        toast.error(zh ? '功能名和营销名都必填' : 'Feature and marketing name are required');
+        return;
+      }
+      payload = {
+        ...editingEntry,
+        title: editingEntry.marketingName,  // keep title in sync for list display
+        content: editingEntry.content || '',  // notes (optional)
+      };
+    }
+
     setSaving(true);
     try {
-      await kb.saveEntry(editingEntry as kb.KnowledgeEntryInput);
+      await kb.saveEntry(payload as kb.KnowledgeEntryInput);
       toast.success(zh ? '已保存' : 'Saved');
       setEditingEntry(null);
       loadData();
@@ -503,94 +525,188 @@ export default function KnowledgePage() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '卖点/参数名' : 'Feature'}</label>
-                    <input
-                      value={editingEntry.feature || ''}
-                      onChange={e => setEditingEntry(prev => ({ ...prev, feature: e.target.value }))}
-                      className="w-full h-8 px-2 text-xs border rounded-md"
-                      placeholder={zh ? '例如：续航' : 'e.g., Battery Life'}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '父卖点（可空）' : 'Parent Feature'}</label>
-                    <input
-                      value={editingEntry.parentFeature || ''}
-                      onChange={e => setEditingEntry(prev => ({ ...prev, parentFeature: e.target.value || null }))}
-                      className="w-full h-8 px-2 text-xs border rounded-md"
-                      placeholder={zh ? '例如：电池' : 'e.g., Battery'}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '类型' : 'Type'}</label>
-                    <select
-                      value={editingEntry.entryType || 'packaging'}
-                      onChange={e => setEditingEntry(prev => ({ ...prev, entryType: e.target.value }))}
-                      className="w-full h-8 px-2 text-xs border rounded-md bg-white"
-                    >
-                      <option value="packaging">{zh ? '包装模板' : 'Packaging Template'}</option>
-                      <option value="brand_name">{zh ? '品牌营销名' : 'Brand Name'}</option>
-                      <option value="competitor">{zh ? '竞品参考' : 'Competitor'}</option>
-                      <option value="rule">{zh ? '品牌规则' : 'Brand Rule'}</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '标题' : 'Title'}</label>
-                    <input
-                      value={editingEntry.title || ''}
-                      onChange={e => setEditingEntry(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full h-8 px-2 text-xs border rounded-md"
-                      placeholder={zh ? '例如：realme P4r 续航包装' : 'Title'}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '品牌' : 'Brand'}</label>
-                      <input
-                        value={editingEntry.brand || ''}
-                        onChange={e => setEditingEntry(prev => ({ ...prev, brand: e.target.value }))}
-                        className="w-full h-8 px-2 text-xs border rounded-md"
-                        placeholder="realme"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '来源 URL' : 'Source URL'}</label>
-                      <input
-                        value={editingEntry.sourceUrl || ''}
-                        onChange={e => setEditingEntry(prev => ({ ...prev, sourceUrl: e.target.value }))}
-                        className="w-full h-8 px-2 text-xs border rounded-md"
-                        placeholder="https://..."
-                      />
-                    </div>
-                  </div>
-                </div>
-
+                {/* Type selector — always shown, controls the form below */}
                 <div>
-                  <label className="text-[10px] text-slate-500 mb-1 block">
-                    {editingEntry.entryType === 'brand_name'
-                      ? (zh ? '营销名称（如"青海湖电池"）' : 'Marketing name (e.g. "Titan Battery")')
-                      : (zh ? '内容' : 'Content')}
-                  </label>
-                  <textarea
-                    value={editingEntry.content || ''}
-                    onChange={e => setEditingEntry(prev => ({ ...prev, content: e.target.value }))}
-                    rows={editingEntry.entryType === 'brand_name' ? 2 : 4}
-                    className="w-full px-2 py-1.5 text-xs border rounded-md resize-y"
-                    placeholder={
-                      editingEntry.entryType === 'brand_name'
-                        ? (zh ? '输入该功能的品牌营销名，如"青海湖电池"、"超感光主摄"' : 'Brand marketing name, e.g. "Titan Battery"')
-                        : editingEntry.entryType === 'packaging'
-                        ? (zh ? '输入包装模板，如 L3 拆解维度：续航/长寿/轻薄/安全...' : 'Packaging template, e.g. L3 dimensions: endurance/longevity/slim/safety...')
-                        : editingEntry.entryType === 'rule'
-                        ? (zh ? '输入品牌规则，如"禁止使用极限词"、"电池必须强调安全认证"' : 'Brand rule, e.g. "No superlatives unless verified"')
-                        : (zh ? '粘贴竞品文案或参考内容...' : 'Paste competitor copy or reference...')
-                    }
-                  />
+                  <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '类型' : 'Type'}</label>
+                  <select
+                    value={editingEntry.entryType || 'packaging'}
+                    onChange={e => setEditingEntry(prev => ({ ...prev, entryType: e.target.value }))}
+                    className="w-full h-8 px-2 text-xs border rounded-md bg-white"
+                  >
+                    <option value="packaging">{zh ? '包装模板' : 'Packaging Template'}</option>
+                    <option value="brand_name">{zh ? '品牌营销名' : 'Brand Name'}</option>
+                    <option value="competitor">{zh ? '竞品参考' : 'Competitor'}</option>
+                    <option value="rule">{zh ? '品牌规则' : 'Brand Rule'}</option>
+                  </select>
                 </div>
+
+                {/* ─── brand_name 类型：简化结构化表单 ─── */}
+                {editingEntry.entryType === 'brand_name' ? (
+                  <>
+                    {/* Help tooltip */}
+                    <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-md">
+                      <HelpCircle className="h-3.5 w-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-[10px] text-amber-800 leading-relaxed">
+                        {zh ? (
+                          <>
+                            <b>品牌营销名</b>是品牌为某类参数固定使用的命名风格。
+                            例如华为相机统一叫"超感光主摄"，OPPO 电池叫"长寿版电池"。
+                            填写后，该名称会出现在所有相关产品的 L1 卖点命名中，<u>前面的参数数值会随产品自动变化</u>。
+                          </>
+                        ) : (
+                          <>
+                            <b>Brand Marketing Name</b> is a fixed naming style a brand uses for a feature.
+                            E.g. Huawei calls all cameras "Ultra-Sensing", OPPO calls batteries "Endurance Edition".
+                            Once set, it appears in the L1 of every related product — only the parameter value before it changes.
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Feature dropdown */}
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">
+                          {zh ? '功能 / 卖点类型' : 'Feature'} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          list="brand-name-features"
+                          value={editingEntry.feature || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, feature: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md bg-white"
+                          placeholder={zh ? '例如：电池、影像、芯片' : 'e.g., Battery, Camera, Chip'}
+                        />
+                        <datalist id="brand-name-features">
+                          {COMMON_FEATURES_ZH.map(f => <option key={f} value={f} />)}
+                        </datalist>
+                      </div>
+
+                      {/* Marketing Name */}
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">
+                          {zh ? '品牌营销名' : 'Marketing Name'} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          value={editingEntry.marketingName || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, marketingName: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder={zh ? '例如：青海湖电池' : 'e.g., Titan Battery'}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Live preview */}
+                    {editingEntry.feature && editingEntry.marketingName && (
+                      <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-md">
+                        <div className="text-[10px] text-slate-500 mb-1">
+                          {zh ? 'L1 命名预览（参数会随产品自动替换）' : 'L1 preview (parameter will vary per product)'}
+                        </div>
+                        <div className="font-mono text-xs text-slate-800">
+                          <span className="text-blue-600">[参数]</span> <span className="font-medium">{editingEntry.marketingName}</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 mt-1">
+                          {zh ? '例如：' : 'e.g., '}
+                          <span className="font-mono">7000mAh {editingEntry.marketingName}</span>
+                          {' · '}
+                          <span className="font-mono">5800mAh {editingEntry.marketingName}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Optional: brand + notes */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '品牌（可选）' : 'Brand (optional)'}</label>
+                        <input
+                          value={editingEntry.brand || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, brand: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder="realme"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '备注（可选）' : 'Notes (optional)'}</label>
+                        <input
+                          value={editingEntry.content || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, content: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder={zh ? '内部备注，不进入 AI' : 'Internal notes, not sent to AI'}
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* ─── 其他类型：原始 freeform 表单 ─── */
+                  <>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '卖点/参数名' : 'Feature'}</label>
+                        <input
+                          value={editingEntry.feature || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, feature: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder={zh ? '例如：续航' : 'e.g., Battery Life'}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '父卖点（可空）' : 'Parent Feature'}</label>
+                        <input
+                          value={editingEntry.parentFeature || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, parentFeature: e.target.value || null }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder={zh ? '例如：电池' : 'e.g., Battery'}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '标题' : 'Title'}</label>
+                        <input
+                          value={editingEntry.title || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, title: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder={zh ? '例如：realme P4r 续航包装' : 'Title'}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '品牌' : 'Brand'}</label>
+                        <input
+                          value={editingEntry.brand || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, brand: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder="realme"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '来源 URL' : 'Source URL'}</label>
+                        <input
+                          value={editingEntry.sourceUrl || ''}
+                          onChange={e => setEditingEntry(prev => ({ ...prev, sourceUrl: e.target.value }))}
+                          className="w-full h-8 px-2 text-xs border rounded-md"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '内容' : 'Content'}</label>
+                      <textarea
+                        value={editingEntry.content || ''}
+                        onChange={e => setEditingEntry(prev => ({ ...prev, content: e.target.value }))}
+                        rows={4}
+                        className="w-full px-2 py-1.5 text-xs border rounded-md resize-y"
+                        placeholder={
+                          editingEntry.entryType === 'packaging'
+                            ? (zh ? '输入包装模板，如 L3 拆解维度：续航/长寿/轻薄/安全...' : 'Packaging template, e.g. L3 dimensions: endurance/longevity/slim/safety...')
+                            : editingEntry.entryType === 'rule'
+                            ? (zh ? '输入品牌规则，如"禁止使用极限词"、"电池必须强调安全认证"' : 'Brand rule, e.g. "No superlatives unless verified"')
+                            : (zh ? '粘贴竞品文案或参考内容...' : 'Paste competitor copy or reference...')
+                        }
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="flex justify-end gap-2 pt-1">
                   <Button size="sm" variant="outline" onClick={() => setEditingEntry(null)} className="text-xs h-7">

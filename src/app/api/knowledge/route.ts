@@ -93,10 +93,26 @@ export async function POST(request: NextRequest) {
     }
 
     // New path: KnowledgeEntry
-    const { feature, parentFeature, entryType, title, content, brand, sourceUrl, structured, tags } = body;
-    if (!feature || !entryType || !title || !content) {
+    const { feature, parentFeature, entryType, title, content, brand, sourceUrl, marketingName, structured, tags } = body;
+    if (!feature || !entryType) {
       return NextResponse.json(
-        { error: 'feature, entryType, title, and content are required' },
+        { error: 'feature and entryType are required' },
+        { status: 400 }
+      );
+    }
+
+    // brand_name entries: require marketingName instead of title/content
+    // (title/content fall back to marketingName so list-display still works)
+    if (entryType === 'brand_name') {
+      if (!marketingName) {
+        return NextResponse.json(
+          { error: 'marketingName is required for brand_name entries' },
+          { status: 400 }
+        );
+      }
+    } else if (!title || !content) {
+      return NextResponse.json(
+        { error: 'title and content are required' },
         { status: 400 }
       );
     }
@@ -107,10 +123,11 @@ export async function POST(request: NextRequest) {
         feature,
         parentFeature: parentFeature || null,
         entryType,
-        title,
-        content,
+        title: title || marketingName || '',
+        content: content || '',
         brand: brand || null,
         sourceUrl: sourceUrl || null,
+        marketingName: marketingName || null,
         structured: structured || null,
         tags: tags || null,
       },

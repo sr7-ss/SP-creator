@@ -9,6 +9,8 @@ export interface LocalKnowledgeEntry {
   content: string;
   brand: string | null;
   sourceUrl: string | null;
+  /** brand_name entries: fixed marketing name, e.g. "青海湖电池" */
+  marketingName: string | null;
   structured: unknown;
   tags: string[] | null;
   createdAt: string;

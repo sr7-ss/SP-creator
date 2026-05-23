@@ -20,6 +20,8 @@ export interface KnowledgeEntryInput {
   content: string;
   brand?: string | null;
   sourceUrl?: string | null;
+  /** brand_name entries only: the fixed marketing name (e.g. "青海湖电池") */
+  marketingName?: string | null;
   structured?: unknown;
   tags?: string[] | null;
 }
@@ -64,6 +66,7 @@ export async function saveEntry(input: KnowledgeEntryInput): Promise<KnowledgeEn
         content: input.content,
         brand: input.brand ?? null,
         sourceUrl: input.sourceUrl ?? null,
+        marketingName: input.marketingName ?? null,
         structured: input.structured ?? null,
         tags: input.tags ?? null,
         createdAt: existing?.createdAt || now,
@@ -81,6 +84,7 @@ export async function saveEntry(input: KnowledgeEntryInput): Promise<KnowledgeEn
       content: input.content,
       brand: input.brand ?? null,
       sourceUrl: input.sourceUrl ?? null,
+      marketingName: input.marketingName ?? null,
       structured: input.structured ?? null,
       tags: input.tags ?? null,
       createdAt: now,

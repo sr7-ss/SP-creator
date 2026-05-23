@@ -187,11 +187,12 @@ model KnowledgeEntry {
   userId        String
   feature       String   // selling point name, e.g. "续航", "电池", "屏幕"
   parentFeature String?  // parent group, e.g. "电池" for sub-feature "续航"
-  entryType     String   // "packaging" | "competitor" | "rule"
+  entryType     String   // "packaging" | "competitor" | "rule" | "brand_name"
   title         String
   content       String   @db.Text
   brand         String?  // brand tag, e.g. "realme", "vivo"
   sourceUrl     String?  // competitor website URL if applicable
+  marketingName String?  // brand_name entries: fixed marketing name for this feature, e.g. "青海湖电池"
   structured    Json?    // structured L1/L2/L3 data
   tags          Json?    // string[] for flexible filtering
   createdAt     DateTime @default(now())

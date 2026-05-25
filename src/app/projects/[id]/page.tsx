@@ -508,31 +508,6 @@ export default function ProjectDetailPage() {
     }
   }, [kspItems, project, locale, aiSettings]);
 
-  // Save a packaging result to knowledge base
-  const handleSaveToKnowledge = useCallback(async (item: KspItem) => {
-    try {
-      await fetch('/api/knowledge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: 'packaging',
-          content: `${item.featureName}: ${item.l1Name} — ${item.l2Slogan}`,
-          structured: {
-            param: item.featureName,
-            tier: item.tier,
-            l1Name: item.l1Name,
-            l2Slogan: item.l2Slogan,
-            l2SloganType: item.l2SloganType,
-            l3Details: item.l3Details,
-          },
-        }),
-      });
-      toast.success(locale === 'zh' ? '已存入知识库' : 'Saved to knowledge base');
-    } catch {
-      toast.error(locale === 'zh' ? '保存失败' : 'Save failed');
-    }
-  }, [locale]);
-
   // Handle parsed products from SmartPaste / TextParseDialog.
   // Updates state directly (no page reload) so data is never lost.
   const handleParsedProducts = useCallback(

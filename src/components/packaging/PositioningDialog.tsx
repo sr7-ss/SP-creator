@@ -20,8 +20,6 @@ export interface ProductPositioning {
   positioning: string;
   /** KSP packaging from a previous project to use as style reference */
   referencePackaging?: string;
-  /** Selected knowledge entry IDs to include */
-  knowledgeEntryIds?: string[];
   /** Packaging strategy key (e.g. "value-for-money"). Determines slogan type per KSP tier. */
   packagingStrategy?: string;
 }
@@ -31,13 +29,6 @@ interface ProjectOption {
   name: string;
   segment?: string;
   hasPackaging: boolean;
-}
-
-interface KnowledgeOption {
-  id: string;
-  feature: string;
-  title: string;
-  entryType: string;
 }
 
 const STYLE_OPTIONS = [
@@ -81,12 +72,7 @@ export default function PositioningDialog({
   const [selectedRefProject, setSelectedRefProject] = useState<string>('');
   const [showRefSection, setShowRefSection] = useState(false);
 
-  // Knowledge templates
-  const [knowledgeEntries, setKnowledgeEntries] = useState<KnowledgeOption[]>([]);
-  const [selectedKnowledge, setSelectedKnowledge] = useState<Set<string>>(new Set());
-  const [showKbSection, setShowKbSection] = useState(false);
-
-  // Load projects + knowledge when dialog opens
+  // Load projects when dialog opens
   useEffect(() => {
     if (!open) return;
 
@@ -105,28 +91,12 @@ export default function PositioningDialog({
         setProjects(opts);
       })
       .catch(() => {});
-
-    // Fetch knowledge entries (packaging + brand_name types)
-    fetch('/api/knowledge?entryType=packaging,brand_name')
-      .then(r => r.json())
-      .then((data: { entries?: KnowledgeOption[] }) => {
-        setKnowledgeEntries(data.entries || []);
-      })
-      .catch(() => {});
   }, [open, currentProjectId]);
 
   const toggleStyle = (style: string) => {
     setSelectedStyles(prev =>
       prev.includes(style) ? prev.filter(s => s !== style) : [...prev, style]
     );
-  };
-
-  const toggleKnowledge = (id: string) => {
-    setSelectedKnowledge(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
   };
 
   const handleConfirm = async () => {
@@ -153,7 +123,6 @@ export default function PositioningDialog({
       productStyle: selectedStyles,
       positioning: positioning.trim(),
       referencePackaging,
-      knowledgeEntryIds: selectedKnowledge.size > 0 ? Array.from(selectedKnowledge) : undefined,
       packagingStrategy,
     });
     onOpenChange(false);
@@ -298,52 +267,6 @@ export default function PositioningDialog({
               </div>
             )}
           </div>
-
-          {/* ─── Knowledge templates ─── */}
-          {knowledgeEntries.length > 0 && (
-            <div className="border-t border-slate-100 pt-4">
-              <button
-                onClick={() => setShowKbSection(!showKbSection)}
-                className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-800 transition-colors w-full"
-              >
-                <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', !showKbSection && '-rotate-90')} />
-                {zh ? '使用知识库模板' : 'Use knowledge templates'}
-                {selectedKnowledge.size > 0 && (
-                  <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full ml-1">
-                    {selectedKnowledge.size}
-                  </span>
-                )}
-                <span className="text-xs text-slate-400 ml-auto">{zh ? '选填' : 'optional'}</span>
-              </button>
-              {showKbSection && (
-                <div className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                  {knowledgeEntries.map(entry => (
-                    <button
-                      key={entry.id}
-                      onClick={() => toggleKnowledge(entry.id)}
-                      className={cn(
-                        'w-full text-left flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-all',
-                        selectedKnowledge.has(entry.id) ? 'bg-blue-50 border border-blue-200' : 'hover:bg-slate-50 border border-transparent'
-                      )}
-                    >
-                      <div className={cn('w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center',
-                        selectedKnowledge.has(entry.id) ? 'bg-blue-500 border-blue-500' : 'border-slate-300'
-                      )}>
-                        {selectedKnowledge.has(entry.id) && <span className="text-white text-[8px]">✓</span>}
-                      </div>
-                      <span className="text-slate-500 flex-shrink-0">{entry.feature}</span>
-                      <span className="text-slate-700 truncate">{entry.title}</span>
-                      <span className={cn('text-[9px] px-1 py-0.5 rounded flex-shrink-0',
-                        entry.entryType === 'brand_name' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'
-                      )}>
-                        {entry.entryType === 'brand_name' ? (zh ? '营销名' : 'Name') : (zh ? '模板' : 'Template')}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">

@@ -83,7 +83,7 @@ export interface RunPackagingParams {
   productName: string;
   segment: string;
   competitorContext: string;
-  positioning?: { targetAudience?: string; productStyle?: string[]; positioning?: string; referencePackaging?: string; knowledgeEntryIds?: string[] };
+  positioning?: { targetAudience?: string; productStyle?: string[]; positioning?: string; referencePackaging?: string };
   researchContext?: string;
   /** Strategy key from PACKAGING_STRATEGIES (e.g. "value-for-money"). Determines slogan type per KSP. */
   packagingStrategy?: string;
@@ -142,62 +142,25 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
     return inputParams.some(ip => ip.includes(f) || f.includes(ip));
   };
 
-  let knowledgeExamplesBlock = '';
-  let competitorReferencesBlock = '';
   let brandRules: string[] = [];
 
   try {
-    // Query all KnowledgeEntry types at once
-    const allEntries = await prisma.knowledgeEntry.findMany({
-      where: { userId, entryType: { in: ['packaging', 'competitor', 'rule', 'brand_name'] } },
+    // Query brand_name entries only. The `packaging` / `competitor` / `rule` types
+    // were a previous self-improvement loop (few-shot from user history + competitor
+    // copy injection); both have been removed as the prompt-engineering main line is
+    // still being tuned and that loop interfered with iteration. Re-enable when the
+    // main pipeline is stable.
+    const brandNameRows = await prisma.knowledgeEntry.findMany({
+      where: { userId, entryType: 'brand_name' },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
 
-    // 1. Brand naming rules (brand_name type): "电池：青海湖电池"
-    //    Format: <feature>：<marketingName>. Model is instructed (via <规则> L1 section)
-    //    to combine it with the actual paramValue when generating L1 names.
-    const brandNameEntries = allEntries
-      .filter(e => e.entryType === 'brand_name' && isRelevant(e.feature) && e.marketingName)
+    // Format: "电池：青海湖电池". Model is instructed (via <规则> L1 section) to combine
+    // it with the actual paramValue when generating L1 names.
+    brandRules = brandNameRows
+      .filter(e => isRelevant(e.feature) && e.marketingName)
       .map(e => `${e.feature}：${e.marketingName}`);
-
-    // 2. General rules (rule type): "禁止用极限词"
-    const ruleEntries = allEntries
-      .filter(e => e.entryType === 'rule')
-      .map(e => e.content);
-
-    brandRules = [...brandNameEntries, ...ruleEntries].filter(Boolean);
-
-    // 3. Packaging templates (packaging type): few-shot examples
-    const packagingEntries = allEntries
-      .filter(e => e.entryType === 'packaging' && isRelevant(e.feature))
-      .slice(0, 3);
-
-    if (packagingEntries.length > 0) {
-      const examples = packagingEntries.map(e => {
-        if (e.structured) {
-          try {
-            const s = typeof e.structured === 'string' ? JSON.parse(e.structured) : e.structured;
-            return JSON.stringify(s, null, 2);
-          } catch { /* fall through */ }
-        }
-        return e.content;
-      });
-      knowledgeExamplesBlock = `<参考案例>\n## 参考案例（学习风格，不要照抄）：\n${examples.join('\n---\n')}\n</参考案例>`;
-    }
-
-    // 4. Competitor references (competitor type): competitor messaging context
-    const competitorEntries = allEntries
-      .filter(e => e.entryType === 'competitor' && isRelevant(e.feature))
-      .slice(0, 5);
-
-    if (competitorEntries.length > 0) {
-      const refs = competitorEntries.map(e =>
-        `- ${e.brand || '竞品'} · ${e.feature}: ${e.content.slice(0, 200)}`
-      );
-      competitorReferencesBlock = `<竞品话术>\n## 竞品话术参考（注意差异化，不要雷同）：\n${refs.join('\n')}\n</竞品话术>`;
-    }
-
   } catch (err) {
     console.error('[packaging-core] Knowledge lookup failed:', err);
   }
@@ -237,8 +200,6 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
         positioning: positioning.positioning,
       } : undefined,
       competitorContext,
-      knowledgeExamplesBlock,
-      competitorReferencesBlock,
       referenceStyleBlock,
       researchContextBlock,
       refinementBlock,

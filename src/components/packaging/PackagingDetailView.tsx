@@ -136,7 +136,6 @@ interface PackagingDetailViewProps {
   onBack: () => void;
   onItemUpdate: (itemId: string, updates: Partial<KspItem>) => void;
   onNavigate: (item: KspItem) => void;
-  onSaveToKnowledge?: (item: KspItem) => void;
   productName: string;
   segment?: string;
   competitorContext?: string;

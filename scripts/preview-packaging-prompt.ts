@@ -42,8 +42,6 @@ const userPrompt = getPackagingUserPrompt({
       { feature: '影像', assessment: '我们 50MP 主摄不如红米 K80 的 50MP + 8MP 长焦' },
     ],
   }),
-  knowledgeExamplesBlock: `<参考案例>\n## 参考案例（学习风格，不要照抄）：\n{\n  "featureName": "电池",\n  "l1Name": "5500mAh 长续航",\n  "l2Slogan": "全天满电不断电"\n}\n</参考案例>`,
-  competitorReferencesBlock: `<竞品话术>\n## 竞品话术参考（注意差异化，不要雷同）：\n- 红米 · 电池: 旗舰续航马拉松，48 小时重度使用\n- iQOO · 芯片: 性能狂飙，游戏不掉帧\n</竞品话术>`,
   referenceStyleBlock: `<参考风格>\n## 上一代产品包装风格（请延续这个风格和调性，不要照抄）：\nGT 6 Pro 系列主打"档位性能王者"，文案直给、参数化、不绕弯\n</参考风格>`,
   researchContextBlock: `<调研发现>\n## 调研发现（用户选择的关键结论，包装时参考）：\n- 用户最关心：游戏帧率稳定性（提及率 68%）\n- 用户痛点：续航焦虑，希望"一天一充"\n</调研发现>`,
 });

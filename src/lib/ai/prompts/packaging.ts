@@ -12,7 +12,7 @@ import {
 export function getPackagingSystemPrompt(locale: string, brandRules?: string[]): string {
   const lang = locale === 'zh' ? '中文' : 'English';
   const brandRulesBlock = brandRules && brandRules.length > 0
-    ? `\n<品牌规则>\n以下品牌命名规则必须严格遵守，违反任何一条都需要重新生成：\n${brandRules.map(r => `- ${r}`).join('\n')}\n</品牌规则>\n`
+    ? `\n<品牌规则>\n以下品牌命名规则必须严格遵守。如果你写完发现违反了，必须立刻自我重写后再输出：\n${brandRules.map(r => `- ${r}`).join('\n')}\n</品牌规则>\n`
     : '';
 
   return `<角色>
@@ -38,9 +38,9 @@ export function getPackagingSystemPrompt(locale: string, brandRules?: string[]):
 4. 哪怕不懂手机的用户也能很好地感知到好处
 
 ## 原创性要求（仅针对 L1 营销名和 L2 Slogan）
-- L1 营销名和 L2 Slogan 不能照抄示例和已知品牌话术，必须原创
+- L1 营销名和 L2 Slogan 不能照抄示例，也不能照抄竞品已有的同类话术，必须原创
 - 可以学习示例的句式结构和表达手法，但用词必须不同
-- 唯一例外：品牌知识库指定的营销名，必须使用
+- 唯一例外：<品牌规则> 块中指定的营销名，必须使用
 - L3 子卖点的拆解维度可以照搬示例（因为行业通用参数维度就这些）
 
 ## 废词限制
@@ -188,8 +188,6 @@ export interface PackagingUserPromptArgs {
   segment?: string;
   positioning?: { targetAudience?: string; productStyle?: string[]; positioning?: string };
   competitorContext?: string;        // JSON string from analysis module
-  knowledgeExamplesBlock?: string;   // pre-formatted XML block (includes its own tags)
-  competitorReferencesBlock?: string;
   referenceStyleBlock?: string;
   researchContextBlock?: string;
   refinementBlock?: string;
@@ -198,7 +196,6 @@ export interface PackagingUserPromptArgs {
 export function getPackagingUserPrompt(args: PackagingUserPromptArgs): string {
   const {
     kspItems, productName, segment, positioning, competitorContext,
-    knowledgeExamplesBlock, competitorReferencesBlock,
     referenceStyleBlock, researchContextBlock, refinementBlock,
   } = args;
 
@@ -240,8 +237,6 @@ export function getPackagingUserPrompt(args: PackagingUserPromptArgs): string {
   }
 
   // 3-6. Pre-formatted context blocks (each is already wrapped in its own XML tag)
-  if (knowledgeExamplesBlock) sections.push(knowledgeExamplesBlock);
-  if (competitorReferencesBlock) sections.push(competitorReferencesBlock);
   if (referenceStyleBlock) sections.push(referenceStyleBlock);
   if (researchContextBlock) sections.push(researchContextBlock);
 

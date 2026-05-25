@@ -15,7 +15,6 @@ interface PromptPreviewPanelProps {
   segment?: string;
   competitorContext?: string;
   brandRules?: string[];
-  hasKnowledgeExamples?: boolean;
 }
 
 interface LayerProps {
@@ -57,7 +56,6 @@ export default function PromptPreviewPanel({
   segment,
   competitorContext,
   brandRules,
-  hasKnowledgeExamples,
 }: PromptPreviewPanelProps) {
   const { locale } = useTranslation();
   const zh = locale === 'zh';
@@ -144,24 +142,12 @@ export default function PromptPreviewPanel({
                 content={brandRules.join('\n')}
               />
             )}
-            <PromptLayer
-              label={zh ? '知识库案例' : 'Knowledge Examples'}
-              badge="KB"
-              badgeColor="text-purple-600 border-purple-200 bg-purple-50"
-              description={hasKnowledgeExamples ? (zh ? '已注入' : 'Injected') : (zh ? '暂无相关案例' : 'No matching examples')}
-              content={hasKnowledgeExamples
-                ? (zh ? '（知识库案例在 User Prompt 末尾注入，实际内容由数据库检索结果决定）' : '(Knowledge examples injected at end of User Prompt, actual content from DB retrieval)')
-                : (zh ? '当前无匹配的知识库案例。\n\n添加方法：在卖点包装结果中点击"存入知识库"按钮，或在知识库管理页面手动添加。' : 'No matching examples found.\n\nTo add: click "Save to Knowledge Base" on packaging results, or add manually in Knowledge Base management page.')}
-            />
           </div>
 
           {/* Status indicators */}
           <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-200">
             <span className={cn('text-[10px] px-2 py-0.5 rounded-full border', brandRules && brandRules.length > 0 ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-50 text-slate-400 border-slate-200')}>
               {zh ? '品牌规则' : 'Brand Rules'}: {brandRules?.length || 0}
-            </span>
-            <span className={cn('text-[10px] px-2 py-0.5 rounded-full border', hasKnowledgeExamples ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-50 text-slate-400 border-slate-200')}>
-              {zh ? '知识库' : 'Knowledge'}: {hasKnowledgeExamples ? '✓' : '—'}
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full border bg-slate-50 text-slate-400 border-slate-200">
               {zh ? '系列预设' : 'Series Preset'}: {zh ? '未配置' : 'Not set'}

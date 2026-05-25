@@ -198,36 +198,18 @@ export default function KnowledgePage() {
   // ─── Entry CRUD ────────────────────────────────────────────
 
   const startNewEntry = (type?: string) => {
+    // Only brand_name is creatable via UI now. Other types (packaging / competitor /
+    // rule) can still be auto-created from elsewhere (e.g. PackagingView save-to-KB),
+    // but the manual ADD form is brand_name-only.
     setEditingEntry({
       feature: selectedFeature || '',
       parentFeature: selectedParent,
-      entryType: type || 'packaging',
+      entryType: type || 'brand_name',
       title: '',
       content: '',
       brand: '',
       sourceUrl: '',
-    });
-  };
-
-  // Preset packaging templates for common features
-  const PRESET_TEMPLATES: Record<string, { feature: string; content: string }> = {
-    battery: { feature: '电池', content: 'L3 拆解维度：\n- 续航时间（追剧/游戏/待机）\n- 电池寿命（X年耐用）\n- 机身轻薄（Xmm/Xg）\n- 安全认证\n- 快充配合' },
-    chipset: { feature: '芯片', content: 'L3 拆解维度：\n- CPU 性能提升\n- GPU 图形升级\n- 制程工艺\n- 主频\n- AI 算力' },
-    camera: { feature: '影像', content: 'L3 拆解维度：\n- 主摄传感器\n- 超广角/微距\n- 夜景模式\n- 人像算法\n- 视频录制' },
-    display: { feature: '屏幕', content: 'L3 拆解维度：\n- 刷新率\n- 分辨率/PPI\n- 峰值亮度\n- 护眼认证\n- 色域覆盖' },
-  };
-
-  const createPresetEntry = (key: string) => {
-    const preset = PRESET_TEMPLATES[key];
-    if (!preset) return;
-    setEditingEntry({
-      feature: preset.feature,
-      parentFeature: null,
-      entryType: 'packaging',
-      title: `${preset.feature}包装模板`,
-      content: preset.content,
-      brand: '',
-      sourceUrl: '',
+      marketingName: '',
     });
   };
 
@@ -315,15 +297,8 @@ export default function KnowledgePage() {
           {tree.length === 0 && !editingTemplate && (
             <div className="text-center py-12 text-slate-400">
               <FolderOpen className="h-8 w-8 mx-auto mb-2" />
-              <p className="text-xs">{zh ? '暂无卖点模板或知识条目' : 'No templates or entries yet'}</p>
-              <p className="text-[10px] mt-1 mb-3">{zh ? '快速添加常用模板：' : 'Quick add templates:'}</p>
-              <div className="flex flex-wrap gap-1 justify-center">
-                {Object.entries(PRESET_TEMPLATES).map(([key, preset]) => (
-                  <button key={key} onClick={() => createPresetEntry(key)} className="text-[10px] px-2 py-1 rounded-full border border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300 transition-colors">
-                    {preset.feature}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs">{zh ? '暂无品牌营销名' : 'No brand names yet'}</p>
+              <p className="text-[10px] mt-1">{zh ? '点右上"添加"录入品牌营销名' : 'Click "Add" to register a brand name'}</p>
             </div>
           )}
 
@@ -525,20 +500,19 @@ export default function KnowledgePage() {
                   </button>
                 </div>
 
-                {/* Type selector — always shown, controls the form below */}
-                <div>
-                  <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '类型' : 'Type'}</label>
-                  <select
-                    value={editingEntry.entryType || 'packaging'}
-                    onChange={e => setEditingEntry(prev => ({ ...prev, entryType: e.target.value }))}
-                    className="w-full h-8 px-2 text-xs border rounded-md bg-white"
-                  >
-                    <option value="packaging">{zh ? '包装模板' : 'Packaging Template'}</option>
-                    <option value="brand_name">{zh ? '品牌营销名' : 'Brand Name'}</option>
-                    <option value="competitor">{zh ? '竞品参考' : 'Competitor'}</option>
-                    <option value="rule">{zh ? '品牌规则' : 'Brand Rule'}</option>
-                  </select>
-                </div>
+                {/* Type selector — only shown when editing an existing non-brand_name entry.
+                    New entries default to brand_name (the only manually-creatable type). */}
+                {editingEntry.id && editingEntry.entryType !== 'brand_name' && (
+                  <div>
+                    <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '类型' : 'Type'}</label>
+                    <div className="px-2 py-1.5 text-xs bg-slate-100 rounded-md text-slate-600">
+                      {editingEntry.entryType === 'packaging' ? (zh ? '包装模板（自动生成，不可手动新建）' : 'Packaging template (auto-generated)')
+                        : editingEntry.entryType === 'competitor' ? (zh ? '竞品参考' : 'Competitor')
+                        : editingEntry.entryType === 'rule' ? (zh ? '品牌规则' : 'Brand Rule')
+                        : editingEntry.entryType}
+                    </div>
+                  </div>
+                )}
 
                 {/* ─── brand_name 类型：简化结构化表单 ─── */}
                 {editingEntry.entryType === 'brand_name' ? (
@@ -613,27 +587,6 @@ export default function KnowledgePage() {
                       </div>
                     )}
 
-                    {/* Optional: brand + notes */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '品牌（可选）' : 'Brand (optional)'}</label>
-                        <input
-                          value={editingEntry.brand || ''}
-                          onChange={e => setEditingEntry(prev => ({ ...prev, brand: e.target.value }))}
-                          className="w-full h-8 px-2 text-xs border rounded-md"
-                          placeholder="realme"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-slate-500 mb-1 block">{zh ? '备注（可选）' : 'Notes (optional)'}</label>
-                        <input
-                          value={editingEntry.content || ''}
-                          onChange={e => setEditingEntry(prev => ({ ...prev, content: e.target.value }))}
-                          className="w-full h-8 px-2 text-xs border rounded-md"
-                          placeholder={zh ? '内部备注，不进入 AI' : 'Internal notes, not sent to AI'}
-                        />
-                      </div>
-                    </div>
                   </>
                 ) : (
                   /* ─── 其他类型：原始 freeform 表单 ─── */

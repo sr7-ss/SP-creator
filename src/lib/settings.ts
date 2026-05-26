@@ -57,22 +57,22 @@ function migrateOldSettings(): AppSettings {
 
   // Try old individual keys
   try {
-    const provider = localStorage.getItem('ksp-ai-provider');
-    const apiKey = localStorage.getItem('ksp-api-key');
-    const model = localStorage.getItem('ksp-ai-model');
+    const provider = localStorage.getItem('sp-ai-provider');
+    const apiKey = localStorage.getItem('sp-api-key');
+    const model = localStorage.getItem('sp-ai-model');
     if (apiKey) {
       const p = (provider || 'claude') as AIProvider;
       settings.activeProvider = p;
       settings.aiProviders[p] = { apiKey, model: model || undefined };
-      localStorage.removeItem('ksp-ai-provider');
-      localStorage.removeItem('ksp-api-key');
-      localStorage.removeItem('ksp-ai-model');
+      localStorage.removeItem('sp-ai-provider');
+      localStorage.removeItem('sp-api-key');
+      localStorage.removeItem('sp-ai-model');
     }
   } catch {}
 
   // Try locale
   try {
-    const locale = localStorage.getItem('ksp-locale');
+    const locale = localStorage.getItem('sp-locale');
     if (locale) settings.locale = locale as 'en' | 'zh';
   } catch {}
 
@@ -94,7 +94,7 @@ export function saveSettings(settings: AppSettings): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   // Keep locale in sync for AppProvider
-  localStorage.setItem('ksp-locale', settings.locale);
+  localStorage.setItem('sp-locale', settings.locale);
 }
 
 /** Providers that support Anthropic Messages protocol (for Agent mode) */
@@ -181,7 +181,7 @@ const TASK_CATEGORY_MAP: Record<string, TaskCategory> = {
   'parse-params': 'light',
   'agent-orchestration': 'light',
   'analyze': 'analysis',
-  'ksp-tier': 'analysis',
+  'sp-tier': 'analysis',
   'packaging': 'creative',
   'agent-packaging': 'creative',
   'review-analysis': 'analysis',

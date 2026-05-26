@@ -18,7 +18,7 @@ export async function GET(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const version = await prisma.kspVersion.findFirst({
+    const version = await prisma.spVersion.findFirst({
       where: { id: versionId, projectId },
     });
     if (!version) {
@@ -50,7 +50,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const version = await prisma.kspVersion.update({
+    const version = await prisma.spVersion.update({
       where: { id: versionId },
       data: { name },
     });
@@ -79,7 +79,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    await prisma.kspVersion.delete({
+    await prisma.spVersion.delete({
       where: { id: versionId },
     });
 

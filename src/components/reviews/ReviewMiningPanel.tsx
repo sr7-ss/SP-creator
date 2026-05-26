@@ -19,7 +19,7 @@ import {
   ReviewBatchSummary,
   ReviewSentiment,
   ReviewInsight,
-  KspAdjustmentSuggestion,
+  SpAdjustmentSuggestion,
   AgentProgressStep,
 } from '@/types';
 import { DIMENSION_LABELS } from '@/lib/ai/prompts/review-analysis';
@@ -28,7 +28,7 @@ import { DIMENSION_LABELS } from '@/lib/ai/prompts/review-analysis';
 
 interface ReviewMiningPanelProps {
   projectId?: string;
-  onKspAdjustment?: (suggestions: KspAdjustmentSuggestion[]) => void;
+  onSpAdjustment?: (suggestions: SpAdjustmentSuggestion[]) => void;
 }
 
 // ─── Constants ─────────────────────────────────────────────────────
@@ -55,11 +55,11 @@ const DIRECTION_META: Record<string, { icon: typeof ArrowUp; color: string; labe
 
 const PAGE_SIZE = 20;
 
-const STORAGE_KEY = 'ksp-review-mining-inputs';
+const STORAGE_KEY = 'sp-review-mining-inputs';
 
 // ─── Component ─────────────────────────────────────────────────────
 
-export default function ReviewMiningPanel({ projectId, onKspAdjustment }: ReviewMiningPanelProps) {
+export default function ReviewMiningPanel({ projectId, onSpAdjustment }: ReviewMiningPanelProps) {
   const { t, locale } = useTranslation();
   const zh = locale === 'zh';
 
@@ -99,7 +99,7 @@ export default function ReviewMiningPanel({ projectId, onKspAdjustment }: Review
     summary: ReviewBatchSummary;
     items: ReviewItemResult[];
     themes: ReviewInsight[];
-    kspSuggestions: KspAdjustmentSuggestion[];
+    spSuggestions: SpAdjustmentSuggestion[];
   } | null>(null);
 
   // ─── Review card filter/pagination ───────────────────────
@@ -318,7 +318,7 @@ export default function ReviewMiningPanel({ projectId, onKspAdjustment }: Review
         summary: data.summary,
         items: data.items,
         themes,
-        kspSuggestions: [],
+        spSuggestions: [],
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : (zh ? '分析失败' : 'Analysis failed'));
@@ -339,15 +339,15 @@ export default function ReviewMiningPanel({ projectId, onKspAdjustment }: Review
     const summary = (data.summary || { positive: 0, negative: 0, neutral: 0, dimensions: {} }) as ReviewBatchSummary;
     const items = (data.items || []) as ReviewItemResult[];
     const themes = (data.themes || []) as ReviewInsight[];
-    const kspSuggestions = (data.kspSuggestions || []) as KspAdjustmentSuggestion[];
+    const spSuggestions = (data.spSuggestions || []) as SpAdjustmentSuggestion[];
 
     // If themes are empty, build from dimension summary
     const finalThemes = themes.length > 0 ? themes : buildThemesFromResults(items, summary);
 
-    setResults({ summary, items, themes: finalThemes, kspSuggestions });
+    setResults({ summary, items, themes: finalThemes, spSuggestions });
 
-    if (kspSuggestions.length > 0) {
-      onKspAdjustment?.(kspSuggestions);
+    if (spSuggestions.length > 0) {
+      onSpAdjustment?.(spSuggestions);
     }
   };
 
@@ -747,14 +747,14 @@ export default function ReviewMiningPanel({ projectId, onKspAdjustment }: Review
             </div>
           )}
 
-          {/* KSP Adjustment Suggestions */}
-          {results.kspSuggestions.length > 0 && (
+          {/* SP Adjustment Suggestions */}
+          {results.spSuggestions.length > 0 && (
             <div className="space-y-3">
               <h3 className="font-syne text-lg font-bold text-[#1e2a3a]">
-                {zh ? 'KSP 调整建议' : 'KSP Adjustment Suggestions'}
+                {zh ? 'SP 调整建议' : 'SP Adjustment Suggestions'}
               </h3>
               <div className="space-y-2">
-                {results.kspSuggestions.map((suggestion) => {
+                {results.spSuggestions.map((suggestion) => {
                   const meta = DIRECTION_META[suggestion.direction] || DIRECTION_META.keep;
                   const DirIcon = meta.icon;
                   return (
@@ -798,11 +798,11 @@ export default function ReviewMiningPanel({ projectId, onKspAdjustment }: Review
                           </span>
                         </div>
                       </div>
-                      {projectId && onKspAdjustment && (
+                      {projectId && onSpAdjustment && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => onKspAdjustment([suggestion])}
+                          onClick={() => onSpAdjustment([suggestion])}
                           className="h-7 text-[10px] px-3 shrink-0"
                         >
                           {zh ? '应用' : 'Apply'}

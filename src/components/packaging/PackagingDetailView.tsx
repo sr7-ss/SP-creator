@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, History, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { KspItem, SloganType, L3SubPoint, PackagingVersion } from '@/types';
+import { SpItem, SloganType, L3SubPoint, PackagingVersion } from '@/types';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import ItemChatPanel from './ItemChatPanel';
@@ -54,12 +54,12 @@ export interface BlockContext {
   type: BlockType;
   label: { zh: string; en: string };
   guide: { zh: string; en: string };
-  pills: { zh: string; en: string; prompt: (item: KspItem, zh: boolean) => string }[];
+  pills: { zh: string; en: string; prompt: (item: SpItem, zh: boolean) => string }[];
   /** Index for alt/l3 blocks */
   index?: number;
 }
 
-function getBlockContexts(item: KspItem): BlockContext[] {
+function getBlockContexts(item: SpItem): BlockContext[] {
   const contexts: BlockContext[] = [
     {
       id: 'l1',
@@ -131,11 +131,11 @@ function getBlockContexts(item: KspItem): BlockContext[] {
 // ─── Props ───────────────────────────────────────────────────
 
 interface PackagingDetailViewProps {
-  item: KspItem;
-  allItems: KspItem[];
+  item: SpItem;
+  allItems: SpItem[];
   onBack: () => void;
-  onItemUpdate: (itemId: string, updates: Partial<KspItem>) => void;
-  onNavigate: (item: KspItem) => void;
+  onItemUpdate: (itemId: string, updates: Partial<SpItem>) => void;
+  onNavigate: (item: SpItem) => void;
   productName: string;
   segment?: string;
   competitorContext?: string;
@@ -292,7 +292,7 @@ export default function PackagingDetailView({
     onItemUpdate(item.id, { l2SloganType: types[(idx + 1) % types.length] });
   }, [item, onItemUpdate]);
 
-  const handleApply = useCallback((itemId: string, updates: Partial<KspItem>) => {
+  const handleApply = useCallback((itemId: string, updates: Partial<SpItem>) => {
     onItemUpdate(itemId, updates); toast.success(zh ? '已应用' : 'Applied');
   }, [onItemUpdate, zh]);
 

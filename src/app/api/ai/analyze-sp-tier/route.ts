@@ -4,9 +4,9 @@ import { analyzeAndTier } from '@/lib/analysis/rule-engine';
 import { requireAuth, handleAuthError } from '@/lib/auth/session';
 
 /**
- * POST /api/ai/analyze-ksp-tier
+ * POST /api/ai/analyze-sp-tier
  *
- * Rule-based competitive analysis + KSP tiering.
+ * Rule-based competitive analysis + SP tiering.
  * No AI calls — uses deterministic param comparison and scoring matrix.
  * Output format is fully compatible with the previous AI-based implementation.
  */
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Run rule-based analysis + tiering (no AI needed)
-    const { analysis, kspItems } = analyzeAndTier(
+    const { analysis, spItems } = analyzeAndTier(
       ownProduct,
       competitors,
       locale
@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        await prisma.kspResult.deleteMany({ where: { projectId } });
-        if (kspItems.length > 0) {
-          await prisma.kspResult.createMany({
-            data: kspItems.map((item, idx) => ({
+        await prisma.spResult.deleteMany({ where: { projectId } });
+        if (spItems.length > 0) {
+          await prisma.spResult.createMany({
+            data: spItems.map((item, idx) => ({
               projectId,
               tier: item.tier,
               featureName: item.featureName,
@@ -69,16 +69,16 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (err) {
-        console.error('[analyze-ksp-tier] Failed to persist results:', err);
+        console.error('[analyze-sp-tier] Failed to persist results:', err);
       }
     }
 
-    return NextResponse.json({ analysis, kspItems });
+    return NextResponse.json({ analysis, spItems });
   } catch (error: unknown) {
     const authRes = handleAuthError(error);
     if (authRes) return authRes;
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[analyze-ksp-tier] Error:', message);
+    console.error('[analyze-sp-tier] Error:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

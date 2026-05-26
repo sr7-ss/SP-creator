@@ -18,9 +18,9 @@ export interface ProductPositioning {
   targetAudience: string;
   productStyle: string[];
   positioning: string;
-  /** KSP packaging from a previous project to use as style reference */
+  /** SP packaging from a previous project to use as style reference */
   referencePackaging?: string;
-  /** Packaging strategy key (e.g. "value-for-money"). Determines slogan type per KSP tier. */
+  /** Packaging strategy key (e.g. "value-for-money"). Determines slogan type per SP tier. */
   packagingStrategy?: string;
 }
 
@@ -79,14 +79,14 @@ export default function PositioningDialog({
     // Fetch other projects that have packaging results
     fetch('/api/projects')
       .then(r => r.json())
-      .then((data: { id: string; name: string; segment?: string; _count?: { kspResults: number } }[]) => {
+      .then((data: { id: string; name: string; segment?: string; _count?: { spResults: number } }[]) => {
         const opts = (Array.isArray(data) ? data : [])
           .filter(p => p.id !== currentProjectId)
           .map(p => ({
             id: p.id,
             name: p.name,
             segment: p.segment,
-            hasPackaging: (p._count?.kspResults || 0) > 0,
+            hasPackaging: (p._count?.spResults || 0) > 0,
           }));
         setProjects(opts);
       })
@@ -107,8 +107,8 @@ export default function PositioningDialog({
         const res = await fetch(`/api/projects/${selectedRefProject}`);
         if (res.ok) {
           const data = await res.json();
-          const kspResults = data.kspResults || [];
-          const packaged = kspResults.filter((r: { l1Name?: string }) => r.l1Name);
+          const spResults = data.spResults || [];
+          const packaged = spResults.filter((r: { l1Name?: string }) => r.l1Name);
           if (packaged.length > 0) {
             referencePackaging = packaged.map((r: { featureName: string; l1Name: string; l2Slogan: string; l2SloganType: string }) =>
               `${r.featureName}: L1="${r.l1Name}" L2="${r.l2Slogan}" (${r.l2SloganType})`
@@ -194,12 +194,12 @@ export default function PositioningDialog({
             />
           </div>
 
-          {/* Packaging strategy (决定每个 KSP 的 Slogan 类型分配) */}
+          {/* Packaging strategy (决定每个 SP 的 Slogan 类型分配) */}
           <div className="space-y-2">
             <Label className="text-slate-700 text-sm">
               {zh ? '包装策略' : 'Packaging Strategy'}
               <span className="text-slate-400 text-xs ml-1">
-                ({zh ? '决定每个卖点用哪种 Slogan 类型' : 'decides slogan type per KSP'})
+                ({zh ? '决定每个卖点用哪种 Slogan 类型' : 'decides slogan type per SP'})
               </span>
             </Label>
             <div className="space-y-1.5">

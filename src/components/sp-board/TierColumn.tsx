@@ -3,14 +3,14 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import TierCard from './TierCard';
-import { KspItem, KspTier } from '@/types';
+import { SpItem, SpTier } from '@/types';
 import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
 interface TierColumnProps {
-  tier: KspTier;
+  tier: SpTier;
   title: string;
-  items: KspItem[];
+  items: SpItem[];
   color: 'red' | 'amber' | 'slate';
   onDeleteItem?: (id: string) => void;
   onRenameItem?: (id: string, newName: string) => void;

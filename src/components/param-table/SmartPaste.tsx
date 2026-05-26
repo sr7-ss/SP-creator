@@ -34,10 +34,10 @@ interface SmartPasteProps {
   footerLeft?: React.ReactNode;
 }
 
-const PASTE_TIP_KEY = 'ksp-smart-paste-tip-seen';
+const PASTE_TIP_KEY = 'sp-smart-paste-tip-seen';
 
 function getDraftKey(projectId?: string) {
-  return projectId ? `ksp-paste-draft-${projectId}` : null;
+  return projectId ? `sp-paste-draft-${projectId}` : null;
 }
 
 export default function SmartPaste({
@@ -80,7 +80,7 @@ export default function SmartPaste({
   // First-time tooltip
   const [showTooltip, setShowTooltip] = useState(false);
   useEffect(() => {
-    const hasSeenTooltip = localStorage.getItem('ksp-smart-paste-tooltip-seen');
+    const hasSeenTooltip = localStorage.getItem('sp-smart-paste-tooltip-seen');
     if (!hasSeenTooltip) {
       const timer = setTimeout(() => setShowTooltip(true), 800);
       return () => clearTimeout(timer);
@@ -102,7 +102,7 @@ export default function SmartPaste({
 
   const dismissTooltip = () => {
     setShowTooltip(false);
-    localStorage.setItem('ksp-smart-paste-tooltip-seen', 'true');
+    localStorage.setItem('sp-smart-paste-tooltip-seen', 'true');
   };
 
   // Show paste tip bubble inside dialog on first open

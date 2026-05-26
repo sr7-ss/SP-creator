@@ -27,7 +27,7 @@ export interface LocalTemplate {
   updatedAt: string;
 }
 
-class KspLocalDB extends Dexie {
+class SpLocalDB extends Dexie {
   knowledgeEntries!: Table<LocalKnowledgeEntry, string>;
   templates!: Table<LocalTemplate, string>;
 
@@ -40,13 +40,13 @@ class KspLocalDB extends Dexie {
   }
 }
 
-let _db: KspLocalDB | null = null;
+let _db: SpLocalDB | null = null;
 
-export function getLocalDB(): KspLocalDB {
+export function getLocalDB(): SpLocalDB {
   if (typeof window === 'undefined') {
     throw new Error('Local DB is only available in the browser');
   }
-  if (!_db) _db = new KspLocalDB();
+  if (!_db) _db = new SpLocalDB();
   return _db;
 }
 

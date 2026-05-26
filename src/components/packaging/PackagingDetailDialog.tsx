@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { KspItem, SloganType, L3SubPoint, SloganAlternative, PackagingVersion } from '@/types';
+import { SpItem, SloganType, L3SubPoint, SloganAlternative, PackagingVersion } from '@/types';
 import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -44,8 +44,8 @@ const REFINEMENT_SUGGESTIONS: Array<{ zh: string; en: string }> = [
 interface PackagingDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: KspItem;
-  onItemUpdate?: (itemId: string, updates: Partial<KspItem>) => void;
+  item: SpItem;
+  onItemUpdate?: (itemId: string, updates: Partial<SpItem>) => void;
   onRefine?: (itemId: string, refinementPrompt: string) => Promise<void>;
   onRegenerate?: (itemId: string) => void;
   isRegenerating?: boolean;

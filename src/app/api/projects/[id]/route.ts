@@ -15,7 +15,7 @@ export async function GET(
         products: {
           orderBy: { sortOrder: 'asc' },
         },
-        kspResults: {
+        spResults: {
           orderBy: { sortOrder: 'asc' },
         },
         analyses: {

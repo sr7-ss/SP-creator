@@ -7,10 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { getPackagingSystemPrompt, getPackagingUserPrompt } from '@/lib/ai/prompts/packaging';
-import { KspItem } from '@/types';
+import { SpItem } from '@/types';
 
 interface PromptPreviewPanelProps {
-  items: KspItem[];
+  items: SpItem[];
   productName: string;
   segment?: string;
   competitorContext?: string;
@@ -63,14 +63,14 @@ export default function PromptPreviewPanel({
 
   // Generate the actual prompts
   const systemPrompt = getPackagingSystemPrompt(locale, brandRules);
-  const kspForPrompt = items.filter(i => i.l1Name || i.featureName).map(i => ({
+  const spForPrompt = items.filter(i => i.l1Name || i.featureName).map(i => ({
     tier: i.tier,
     featureName: i.featureName,
     paramValue: i.paramValue,
   }));
-  const userPrompt = kspForPrompt.length > 0
-    ? getPackagingUserPrompt({ kspItems: kspForPrompt, productName, segment, competitorContext })
-    : (zh ? '（需要卖点分级数据后才能生成用户提示词）' : '(Need KSP tier data to generate user prompt)');
+  const userPrompt = spForPrompt.length > 0
+    ? getPackagingUserPrompt({ spItems: spForPrompt, productName, segment, competitorContext })
+    : (zh ? '（需要卖点分级数据后才能生成用户提示词）' : '(Need SP tier data to generate user prompt)');
 
   // Count tokens roughly (1 token ≈ 4 chars for English, ≈ 1.5 chars for Chinese)
   const totalChars = systemPrompt.length + userPrompt.length;
@@ -112,7 +112,7 @@ export default function PromptPreviewPanel({
             <p>{'│  5. 产品背景 + 竞品情报               │'}</p>
             <p>{'│  6. 参考案例 + 竞品话术                │'}</p>
             <p>{'│  7. 参考风格 + 调研发现                │'}</p>
-            <p>{'│  8. 待包装 KSP 列表（末尾，recency）  │'}</p>
+            <p>{'│  8. 待包装 SP 列表（末尾，recency）  │'}</p>
             <p>{'│  9. 指令                              │'}</p>
             <p>{'└─────────────────────────────────────┘'}</p>
           </div>
@@ -130,7 +130,7 @@ export default function PromptPreviewPanel({
               label={zh ? '用户提示词' : 'User Prompt'}
               badge="User"
               badgeColor="text-green-600 border-green-200 bg-green-50"
-              description={zh ? '产品上下文 + KSP数据' : 'Product context + KSP data'}
+              description={zh ? '产品上下文 + SP数据' : 'Product context + SP data'}
               content={userPrompt}
             />
             {brandRules && brandRules.length > 0 && (

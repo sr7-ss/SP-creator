@@ -41,7 +41,7 @@ export async function logUsage(params: {
 export const ACTION_LABELS: Record<string, { en: string; zh: string }> = {
   ai_parse_params: { en: 'Param Recognition', zh: '参数识别' },
   ai_analyze: { en: 'Competitive Analysis', zh: '竞品分析' },
-  ai_ksp_tier: { en: 'KSP Grading', zh: '卖点分级' },
+  ai_ksp_tier: { en: 'SP Grading', zh: '卖点分级' },
   ai_packaging: { en: 'Selling Point Packaging', zh: '卖点包装' },
   ai_agent: { en: 'Agent Mode', zh: 'Agent 模式' },
   ai_review_analysis: { en: 'Review Analysis', zh: '评论分析' },

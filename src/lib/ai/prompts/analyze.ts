@@ -1,4 +1,4 @@
-import { KSP_TIER_RULES } from '@/lib/constants/slogan-rules';
+import { SP_TIER_RULES } from '@/lib/constants/slogan-rules';
 
 /**
  * 生成竞品分析的 System Prompt
@@ -44,7 +44,7 @@ export function getAnalyzeSystemPrompt(locale: string): string {
 - 复合参数（如 "7000mAh + 45W"）拆开分别比较
 - 同一参数有多个竞品值时，取对自有产品最不利的值来判定
 
-${KSP_TIER_RULES}
+${SP_TIER_RULES}
 </rules>
 
 <examples>

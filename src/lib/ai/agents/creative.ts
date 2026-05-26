@@ -1,7 +1,7 @@
 /**
  * Creative Exploration Agent
  *
- * Generates multiple L2 slogan variants for a KSP item,
+ * Generates multiple L2 slogan variants for a SP item,
  * self-evaluates them against brand rules and competitor messaging,
  * and recommends the best option with reasoning.
  */
@@ -33,13 +33,13 @@ const generateVariantsTool: AgentToolDef = {
   definition: {
     name: 'generate_variants',
     description:
-      'Generate 4-5 L2 slogan variants with different creative approaches for a KSP feature. Each variant has text, type (factual/functional/emotional), and a brief rationale.',
+      'Generate 4-5 L2 slogan variants with different creative approaches for a SP feature. Each variant has text, type (factual/functional/emotional), and a brief rationale.',
     input_schema: {
       type: 'object' as const,
       properties: {
         featureName: { type: 'string', description: 'Parameter/feature name' },
         paramValue: { type: 'string', description: 'Parameter value' },
-        tier: { type: 'number', description: 'KSP tier (1/2/3)' },
+        tier: { type: 'number', description: 'SP tier (1/2/3)' },
         productName: { type: 'string', description: 'Product name' },
         segment: { type: 'string', description: 'Market segment (optional)' },
       },
@@ -57,7 +57,7 @@ const generateVariantsTool: AgentToolDef = {
       ? `\nBrand rules to follow:\n${brandRules.map(r => `- ${r}`).join('\n')}\n`
       : '';
 
-    const prompt = `Generate exactly 5 L2 slogan variants for this KSP feature.
+    const prompt = `Generate exactly 5 L2 slogan variants for this SP feature.
 Product: ${input.productName}${input.segment ? ` (${input.segment} segment)` : ''}
 Feature: ${input.featureName}
 Value: ${input.paramValue}
@@ -332,7 +332,7 @@ export function getCreativeAgentConfig(locale: string, brandRules?: string[]): A
     : '';
 
   return {
-    systemPrompt: `You are a creative marketing exploration agent. Your job is to help find the best L2 slogan for a KSP (Key Selling Point) feature.
+    systemPrompt: `You are a creative marketing exploration agent. Your job is to help find the best L2 slogan for a SP (Selling Point) feature.
 
 Your workflow:
 1. First, search the knowledge base for relevant past examples and brand rules (search_knowledge_base)

@@ -8,7 +8,7 @@ import Header from './Header';
 const DEFAULT_WIDTH = 240; // w-60 = 15rem = 240px
 const MIN_WIDTH = DEFAULT_WIDTH - 30; // 210px
 const MAX_WIDTH = DEFAULT_WIDTH + 30; // 270px
-const STORAGE_KEY = 'ksp-sidebar-width';
+const STORAGE_KEY = 'sp-sidebar-width';
 
 export default function ResizableLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

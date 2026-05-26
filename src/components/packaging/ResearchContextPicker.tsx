@@ -204,7 +204,7 @@ export default function ResearchContextPicker({
                 {/* Recommendations */}
                 {report.recommendations.length > 0 && (
                   <div className="space-y-1">
-                    <p className="text-[10px] text-blue-500 font-medium">{zh ? 'KSP 建议' : 'KSP Suggestions'}</p>
+                    <p className="text-[10px] text-blue-500 font-medium">{zh ? 'SP 建议' : 'SP Suggestions'}</p>
                     {report.recommendations.map((rec, idx) => {
                       const key = `rec-${report.id}-${idx}`;
                       return (

@@ -26,7 +26,7 @@ interface TextParseDialogProps {
   projectId?: string;
 }
 
-const DRAFT_KEY_PREFIX = 'ksp-text-parse-draft-';
+const DRAFT_KEY_PREFIX = 'sp-text-parse-draft-';
 
 export default function TextParseDialog({
   onParsed,

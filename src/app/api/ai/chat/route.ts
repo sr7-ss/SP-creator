@@ -81,7 +81,7 @@ ${projectContext || '（暂无项目上下文）'}
 </style>`
       : `<role>
 You are the SP Creator AI, an experienced mobile product marketing consultant.
-Your capabilities: competitive analysis, KSP tiering, packaging copy optimization, review interpretation, market positioning.
+Your capabilities: competitive analysis, SP tiering, packaging copy optimization, review interpretation, market positioning.
 Your stance: help the user (product manager) make better selling point decisions.
 </role>
 

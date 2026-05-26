@@ -17,7 +17,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import TierColumn from './TierColumn';
 import TierCard from './TierCard';
-import { KspItem, KspTier } from '@/types';
+import { SpItem, SpTier } from '@/types';
 import { useTranslation } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,10 +26,10 @@ import { cn } from '@/lib/utils';
 import { loadSettings, getAgentConfigForTask } from '@/lib/settings';
 
 interface TierBoardProps {
-  items: KspItem[];
-  unrankedItems?: KspItem[];
-  onItemsChange: (items: KspItem[]) => void;
-  onUnrankedChange?: (items: KspItem[]) => void;
+  items: SpItem[];
+  unrankedItems?: SpItem[];
+  onItemsChange: (items: SpItem[]) => void;
+  onUnrankedChange?: (items: SpItem[]) => void;
   onGenerateKsp?: () => void;
   isGenerating?: boolean;
   onDeleteItem?: (id: string) => void;
@@ -38,7 +38,7 @@ interface TierBoardProps {
 }
 
 /** Horizontal pool for unranked parameters */
-function UnrankedPool({ items }: { items: KspItem[] }) {
+function UnrankedPool({ items }: { items: SpItem[] }) {
   const { setNodeRef, isOver } = useDroppable({ id: 'tier-0' });
   const { locale } = useTranslation();
 
@@ -80,7 +80,7 @@ function UnrankedPool({ items }: { items: KspItem[] }) {
 }
 
 /** Pool for soft selling points (tier=0) — dashed border, pending assignment */
-function SoftSellingPointPool({ items, locale }: { items: KspItem[]; locale: string }) {
+function SoftSellingPointPool({ items, locale }: { items: SpItem[]; locale: string }) {
   const { setNodeRef, isOver } = useDroppable({ id: 'tier-pending' });
 
   return (
@@ -137,7 +137,7 @@ export default function TierBoard({
   const [showAddForm, setShowAddForm] = useState(false);
   const [newItemName, setNewItemName] = useState('');
   const [newItemValue, setNewItemValue] = useState('');
-  const [newItemTier, setNewItemTier] = useState<KspTier>(3);
+  const [newItemTier, setNewItemTier] = useState<SpTier>(3);
 
   // ─── AI Review state ──────────────────────────
   const [aiReview, setAiReview] = useState<string | null>(null);
@@ -151,11 +151,11 @@ export default function TierBoard({
     try {
       const settings = loadSettings();
       const aiConfig = getAgentConfigForTask(settings, 'analysis' as never);
-      const res = await fetch('/api/ai/ksp-review', {
+      const res = await fetch('/api/ai/sp-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kspItems: rankedItems.map(i => ({ tier: i.tier, featureName: i.featureName, paramValue: i.paramValue })),
+          spItems: rankedItems.map(i => ({ tier: i.tier, featureName: i.featureName, paramValue: i.paramValue })),
           productName: '', // will be filled by parent if needed
           locale: zh ? 'zh' : 'en',
           aiProvider: aiConfig?.provider,
@@ -178,7 +178,7 @@ export default function TierBoard({
   }, [items, zh]);
 
   // Undo history — stores previous item states
-  const [undoStack, setUndoStack] = useState<KspItem[][]>([]);
+  const [undoStack, setUndoStack] = useState<SpItem[][]>([]);
 
   const pushUndo = useCallback(() => {
     setUndoStack(prev => [...prev.slice(-9), [...items]]); // keep last 10
@@ -194,8 +194,8 @@ export default function TierBoard({
   const handleAddItem = useCallback(() => {
     if (!newItemName.trim()) return;
     pushUndo();
-    const newItem: KspItem = {
-      id: `ksp-manual-${Date.now()}`,
+    const newItem: SpItem = {
+      id: `sp-manual-${Date.now()}`,
       tier: newItemTier,
       featureName: newItemName.trim(),
       paramValue: newItemValue.trim(),
@@ -207,14 +207,14 @@ export default function TierBoard({
     setShowAddForm(false);
   }, [newItemName, newItemValue, newItemTier, items, pushUndo, onItemsChange]);
 
-  // Rename a KSP item
+  // Rename a SP item
   const handleRename = useCallback((id: string, newName: string) => {
     onItemsChange(items.map(item =>
       item.id === id ? { ...item, featureName: newName } : item
     ));
   }, [items, onItemsChange]);
 
-  // Update param value of a KSP item
+  // Update param value of a SP item
   const handleUpdateValue = useCallback((id: string, newValue: string) => {
     onItemsChange(items.map(item =>
       item.id === id ? { ...item, paramValue: newValue } : item
@@ -230,7 +230,7 @@ export default function TierBoard({
       const target = items.find(i => i.id === id);
       if (source && target) {
         pushUndo();
-        const merged: KspItem = {
+        const merged: SpItem = {
           ...target,
           featureName: `${target.featureName} + ${source.featureName}`,
           paramValue: [target.paramValue, source.paramValue].filter(Boolean).join(' / '),
@@ -252,7 +252,7 @@ export default function TierBoard({
     const names = item.featureName.split(' + ').map(s => s.trim());
     const values = item.paramValue.split(' / ').map(s => s.trim());
 
-    const newItems: KspItem[] = names.map((name, idx) => ({
+    const newItems: SpItem[] = names.map((name, idx) => ({
       ...item,
       id: idx === 0 ? item.id : `${item.id}-split-${idx}`,
       featureName: name,
@@ -299,7 +299,7 @@ export default function TierBoard({
       const isFromUnranked = !!fromUnranked;
 
       // Determine target tier (0 = unranked)
-      let targetTier: 0 | KspTier;
+      let targetTier: 0 | SpTier;
       if (overId === 'tier-0' || unrankedItems.some((i) => i.id === overId)) {
         targetTier = 0;
       } else if (overId === 'tier-pending' || tier0Items.some((i) => i.id === overId)) {
@@ -319,7 +319,7 @@ export default function TierBoard({
         if (isFromUnranked) return; // already unranked, no-op
         // Remove from ranked, add to unranked
         const newRanked = items.filter((i) => i.id !== activeItemId);
-        const movedToUnranked: KspItem = { ...draggedItem, tier: 1, sortOrder: 0 }; // tier doesn't matter for unranked
+        const movedToUnranked: SpItem = { ...draggedItem, tier: 1, sortOrder: 0 }; // tier doesn't matter for unranked
         onItemsChange(reindex(newRanked));
         onUnrankedChange?.([...unrankedItems, movedToUnranked]);
         return;
@@ -328,7 +328,7 @@ export default function TierBoard({
       // Case: dragging from unranked to a tier
       if (isFromUnranked) {
         const newUnranked = unrankedItems.filter((i) => i.id !== activeItemId);
-        const movedItem: KspItem = { ...draggedItem, tier: targetTier as KspTier, sortOrder: 0 };
+        const movedItem: SpItem = { ...draggedItem, tier: targetTier as SpTier, sortOrder: 0 };
 
         // Insert into target tier
         const tierItems = items.filter((i) => i.tier === targetTier);
@@ -345,22 +345,22 @@ export default function TierBoard({
 
       // Case: reorder within ranked tiers (including tier 0 soft selling points)
       const fromTier = draggedItem.tier;
-      const movedItem: KspItem = { ...draggedItem, tier: targetTier as KspTier };
+      const movedItem: SpItem = { ...draggedItem, tier: targetTier as SpTier };
 
       const t0 = items.filter((i) => i.tier === 0);
       const t1 = items.filter((i) => i.tier === 1);
       const t2 = items.filter((i) => i.tier === 2);
       const t3 = items.filter((i) => i.tier === 3);
 
-      const tierMap: Record<number, KspItem[]> = { 0: t0, 1: t1, 2: t2, 3: t3 };
+      const tierMap: Record<number, SpItem[]> = { 0: t0, 1: t1, 2: t2, 3: t3 };
 
-      const withoutActive = (list: KspItem[]) => list.filter((i) => i.id !== activeItemId);
-      const insertAt = (list: KspItem[], overId: string) => {
+      const withoutActive = (list: SpItem[]) => list.filter((i) => i.id !== activeItemId);
+      const insertAt = (list: SpItem[], overId: string) => {
         const idx = list.findIndex((i) => i.id === overId);
         return idx === -1 ? list.length : idx;
       };
 
-      const nextTiers: Record<number, KspItem[]> = { 0: t0, 1: t1, 2: t2, 3: t3 };
+      const nextTiers: Record<number, SpItem[]> = { 0: t0, 1: t1, 2: t2, 3: t3 };
 
       if (fromTier === targetTier) {
         const current = tierMap[targetTier] || [];
@@ -464,7 +464,7 @@ export default function TierBoard({
           />
           <select
             value={newItemTier}
-            onChange={e => setNewItemTier(Number(e.target.value) as KspTier)}
+            onChange={e => setNewItemTier(Number(e.target.value) as SpTier)}
             className="h-8 text-xs border border-slate-200 rounded-md px-2 bg-white"
           >
             <option value={1}>T1</option>
@@ -580,7 +580,7 @@ export default function TierBoard({
 }
 
 /** Re-assign sortOrder sequentially within each tier */
-function reindex(items: KspItem[]): KspItem[] {
+function reindex(items: SpItem[]): SpItem[] {
   const counters: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0 };
   return items.map((item) => {
     const tier = item.tier;

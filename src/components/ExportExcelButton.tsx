@@ -4,16 +4,16 @@ import { useState, useCallback } from 'react';
 import { FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/store';
 import { PARAM_CATEGORIES } from '@/lib/constants/param-weights';
-import { KspItem } from '@/types';
+import { SpItem } from '@/types';
 
 interface ExportExcelButtonProps {
   projectName: string;
   activeTab: 'compare' | 'ksp' | 'packaging';
-  kspItems: KspItem[];
+  spItems: SpItem[];
   products: { id: string; name: string; isOwnProduct: boolean; values: Record<string, string> }[];
 }
 
-export default function ExportExcelButton({ projectName, activeTab, kspItems, products }: ExportExcelButtonProps) {
+export default function ExportExcelButton({ projectName, activeTab, spItems, products }: ExportExcelButtonProps) {
   const { locale } = useTranslation();
   const [exporting, setExporting] = useState(false);
 
@@ -49,24 +49,24 @@ export default function ExportExcelButton({ projectName, activeTab, kspItems, pr
         XLSX.utils.book_append_sheet(wb, ws, locale === 'zh' ? '参数对比' : 'Comparison');
 
       } else if (activeTab === 'ksp') {
-        // KSP tiering
+        // SP tiering
         const headers = ['Tier', locale === 'zh' ? '卖点' : 'Feature', locale === 'zh' ? '参数值' : 'Param Value'];
         const rows: string[][] = [headers];
 
-        for (const item of [...kspItems].sort((a, b) => a.tier - b.tier)) {
+        for (const item of [...spItems].sort((a, b) => a.tier - b.tier)) {
           rows.push([`T${item.tier}`, item.featureName, item.paramValue]);
         }
 
         const ws = XLSX.utils.aoa_to_sheet(rows);
         ws['!cols'] = [{ wch: 6 }, { wch: 25 }, { wch: 40 }];
-        XLSX.utils.book_append_sheet(wb, ws, 'KSP');
+        XLSX.utils.book_append_sheet(wb, ws, 'SP');
 
       } else {
         // Packaging
         const headers = ['Tier', locale === 'zh' ? '卖点' : 'Feature', 'L1', 'L2 Slogan', locale === 'zh' ? 'Slogan类型' : 'Type', locale === 'zh' ? '备选Slogan' : 'Alt Slogans', 'L3'];
         const rows: string[][] = [headers];
 
-        for (const item of [...kspItems].sort((a, b) => a.tier - b.tier)) {
+        for (const item of [...spItems].sort((a, b) => a.tier - b.tier)) {
           if (!item.l1Name) continue;
           const l3Text = item.l3Details?.map(d => `${d.name}: ${d.description}`).join(' | ') || '';
           const altsText = item.l2Alternatives?.map(a => a.text).join(' | ') || '';
@@ -85,7 +85,7 @@ export default function ExportExcelButton({ projectName, activeTab, kspItems, pr
     } finally {
       setExporting(false);
     }
-  }, [exporting, activeTab, projectName, kspItems, products, locale]);
+  }, [exporting, activeTab, projectName, spItems, products, locale]);
 
   return (
     <button

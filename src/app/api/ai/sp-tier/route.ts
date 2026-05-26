@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callTracked } from '@/lib/ai/track-call';
-import { getKspTierSystemPrompt, getKspTierUserPrompt } from '@/lib/ai/prompts/ksp-tier';
+import { getSpTierSystemPrompt, getSpTierUserPrompt } from '@/lib/ai/prompts/sp-tier';
 import { AIProvider } from '@/types';
 import { requireAuth, handleAuthError } from '@/lib/auth/session';
 
@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const systemPrompt = getKspTierSystemPrompt(locale);
-    const userPrompt = getKspTierUserPrompt(
+    const systemPrompt = getSpTierSystemPrompt(locale);
+    const userPrompt = getSpTierUserPrompt(
       JSON.stringify(analysisResult),
       ownProductName,
       segment
@@ -66,14 +66,14 @@ export async function POST(request: NextRequest) {
     };
 
     type UnknownRecord = Record<string, unknown>;
-    const normalizeKspItems = (
+    const normalizeSpItems = (
       raw: unknown
     ): { tier: 1 | 2 | 3; featureName: string; paramValue: string; reasoning?: string }[] => {
       const rawObj: UnknownRecord =
         raw && typeof raw === 'object' ? (raw as UnknownRecord) : {};
 
-      const kspItemsVal = rawObj['kspItems'];
-      const fromArray: unknown[] = Array.isArray(kspItemsVal) ? kspItemsVal : [];
+      const spItemsVal = rawObj['spItems'];
+      const fromArray: unknown[] = Array.isArray(spItemsVal) ? spItemsVal : [];
 
       // Fallback shapes (some models may output tier1/tier2/tier3).
       const tier1Val = rawObj['tier1'] ?? rawObj['T1'];
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
       const candidates = fromArray.length > 0 ? fromArray : fromTiers;
 
-      type KspItem = { tier: 1 | 2 | 3; featureName: string; paramValue: string; reasoning?: string };
+      type SpItem = { tier: 1 | 2 | 3; featureName: string; paramValue: string; reasoning?: string };
       const mapped = candidates.map((candidate) => {
           const itemObj: UnknownRecord =
             candidate && typeof candidate === 'object' ? (candidate as UnknownRecord) : {};
@@ -109,10 +109,10 @@ export async function POST(request: NextRequest) {
           ).trim();
 
           const reasoning = typeof itemObj['reasoning'] === 'string' ? itemObj['reasoning'] : undefined;
-          return { tier, featureName, paramValue, reasoning } as KspItem;
+          return { tier, featureName, paramValue, reasoning } as SpItem;
         });
       return mapped.filter(
-          (x): x is KspItem => x !== null
+          (x): x is SpItem => x !== null
         );
     };
 
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         provider: aiProvider as AIProvider,
         apiKey,
         model,
-        cacheSystemPrompt: true,   // ksp-tier system prompt is reused across regenerations
+        cacheSystemPrompt: true,   // sp-tier system prompt is reused across regenerations
         messages: [
           { role: 'system', content: systemPrompt },
           {
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       try {
         const jsonText = extractJson(response.content);
         const parsed: unknown = JSON.parse(jsonText);
-        return normalizeKspItems(parsed);
+        return normalizeSpItems(parsed);
       } catch {
         return null;
       }
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
 
     const first = await generateOnce();
     if (first && hasAllTiers(first)) {
-      return NextResponse.json({ kspItems: first });
+      return NextResponse.json({ spItems: first });
     }
 
     // Retry once if the model missed one or more tiers.
@@ -159,11 +159,11 @@ export async function POST(request: NextRequest) {
     const second = await generateOnce(retryInstruction, 'ai_ksp_tier_retry');
 
     if (second) {
-      return NextResponse.json({ kspItems: second });
+      return NextResponse.json({ spItems: second });
     }
 
     return NextResponse.json(
-      { error: zh ? 'AI 返回格式异常，请重试' : 'Failed to parse AI response for ksp-tier generation' },
+      { error: zh ? 'AI 返回格式异常，请重试' : 'Failed to parse AI response for sp-tier generation' },
       { status: 500 }
     );
   } catch (error: unknown) {

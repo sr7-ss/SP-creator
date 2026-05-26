@@ -10,12 +10,12 @@ import { useAgentStream } from '@/lib/useAgentStream';
 import { useTranslation } from '@/lib/store';
 import { loadSettings } from '@/lib/settings';
 import { cn } from '@/lib/utils';
-import type { KspItem, SloganType } from '@/types';
+import type { SpItem, SloganType } from '@/types';
 
 interface CreativeExplorePanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: KspItem | null;
+  item: SpItem | null;
   productName: string;
   segment?: string;
   competitorContext?: string;

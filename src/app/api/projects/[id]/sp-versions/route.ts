@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, handleAuthError } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/client';
 
-// GET: List all KSP versions for a project
+// GET: List all SP versions for a project
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,7 +19,7 @@ export async function GET(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const versions = await prisma.kspVersion.findMany({
+    const versions = await prisma.spVersion.findMany({
       where: { projectId },
       orderBy: { createdAt: 'desc' },
       select: {
@@ -38,7 +38,7 @@ export async function GET(
   }
 }
 
-// POST: Save current KSP state as a new version
+// POST: Save current SP state as a new version
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -46,10 +46,10 @@ export async function POST(
   try {
     const { userId } = await requireAuth();
     const { id: projectId } = await params;
-    const { name, kspItems } = await req.json();
+    const { name, spItems } = await req.json();
 
-    if (!name || !kspItems) {
-      return NextResponse.json({ error: 'name and kspItems are required' }, { status: 400 });
+    if (!name || !spItems) {
+      return NextResponse.json({ error: 'name and spItems are required' }, { status: 400 });
     }
 
     // Verify project ownership
@@ -60,11 +60,11 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const version = await prisma.kspVersion.create({
+    const version = await prisma.spVersion.create({
       data: {
         projectId,
         name,
-        snapshot: kspItems,
+        snapshot: spItems,
       },
     });
 

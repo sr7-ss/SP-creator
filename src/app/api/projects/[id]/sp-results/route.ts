@@ -3,8 +3,8 @@ import { prisma } from '@/lib/db/client';
 import { requireAuth, handleAuthError } from '@/lib/auth/session';
 
 /**
- * PUT /api/projects/[id]/ksp-results
- * Replace all KSP results for a project (used after drag-reorder or manual edits).
+ * PUT /api/projects/[id]/sp-results
+ * Replace all SP results for a project (used after drag-reorder or manual edits).
  */
 export async function PUT(
   request: NextRequest,
@@ -40,10 +40,10 @@ export async function PUT(
       return NextResponse.json({ error: 'items array is required' }, { status: 400 });
     }
 
-    // Replace all KSP results in a transaction
+    // Replace all SP results in a transaction
     await prisma.$transaction([
-      prisma.kspResult.deleteMany({ where: { projectId } }),
-      prisma.kspResult.createMany({
+      prisma.spResult.deleteMany({ where: { projectId } }),
+      prisma.spResult.createMany({
         data: items.map((item, idx) => ({
           projectId,
           tier: item.tier,
@@ -64,7 +64,7 @@ export async function PUT(
   } catch (error) {
     const authRes = handleAuthError(error);
     if (authRes) return authRes;
-    console.error('Failed to save KSP results:', error);
-    return NextResponse.json({ error: 'Failed to save KSP results' }, { status: 500 });
+    console.error('Failed to save SP results:', error);
+    return NextResponse.json({ error: 'Failed to save SP results' }, { status: 500 });
   }
 }

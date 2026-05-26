@@ -12,7 +12,7 @@ export default function AppProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const saved = localStorage.getItem('ksp-locale') as Locale | null;
+    const saved = localStorage.getItem('sp-locale') as Locale | null;
     if (saved) setLocale(saved);
   }, []);
 
@@ -23,7 +23,7 @@ export default function AppProvider({ children }: { children: ReactNode }) {
 
   const handleSetLocale = (newLocale: Locale) => {
     setLocale(newLocale);
-    localStorage.setItem('ksp-locale', newLocale);
+    localStorage.setItem('sp-locale', newLocale);
   };
 
   return (

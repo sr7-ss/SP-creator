@@ -22,7 +22,7 @@ const DATA_ROWS: DataRow[] = [
     },
   },
   {
-    label: { zh: '知识库条目 / KSP 结果 / 包装文案', en: 'Knowledge entries / KSP / packaging copy' },
+    label: { zh: '知识库条目 / SP 结果 / 包装文案', en: 'Knowledge entries / SP / packaging copy' },
     destination: 'local',
     note: {
       zh: '存于浏览器 IndexedDB（由浏览器做同源隔离，其他网站无法读取）。',
@@ -133,8 +133,8 @@ export default function PrivacyPage() {
                   {zh ? '敏感内容不过服务器。' : 'Sensitive content never passes our server.'}
                 </strong>{' '}
                 {zh
-                  ? '你上传的 PDF、编辑的 KSP 文案、生成的包装结果，开启隐私模式后全部存在你的浏览器内。'
-                  : 'Uploaded PDFs, edited KSP copy, and generated packaging stay in your browser when privacy mode is on.'}
+                  ? '你上传的 PDF、编辑的 SP 文案、生成的包装结果，开启隐私模式后全部存在你的浏览器内。'
+                  : 'Uploaded PDFs, edited SP copy, and generated packaging stay in your browser when privacy mode is on.'}
               </span>
             </li>
             <li className="flex gap-3">

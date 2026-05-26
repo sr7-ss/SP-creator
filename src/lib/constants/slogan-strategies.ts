@@ -1,7 +1,7 @@
 /**
  * Packaging strategies — per product positioning.
  *
- * The strategy determines, given a KSP's (tier, leadLevel), which slogan type
+ * The strategy determines, given a SP's (tier, leadLevel), which slogan type
  * is the "main" choice and whether the slogan can use 极限词 ("最强"/"首个"/etc).
  * This used to be hard-coded in SLOGAN_GENERATION_RULES Step 1 — moving it here
  * makes the decision deterministic and easy to extend when the team produces
@@ -14,7 +14,7 @@
 export type SloganType = 'factual' | 'functional' | 'emotional';
 
 export interface SloganDecision {
-  /** Which slogan type should be the main (l2Slogan) for this KSP */
+  /** Which slogan type should be the main (l2Slogan) for this SP */
   sloganType: SloganType;
   /** Whether 极限词 ("最强" / "首个" / "唯一" / "第一档") is permitted */
   allowExtreme: boolean;
@@ -86,7 +86,7 @@ export function decideLeadLevel(tier: number): LeadLevel {
   return 'noAdvantage';
 }
 
-/** Main entry: given strategy key and KSP tier, return the slogan decision. */
+/** Main entry: given strategy key and SP tier, return the slogan decision. */
 export function decideSloganTypeForKsp(strategyKey: string | null | undefined, tier: number): SloganDecision {
   const strategy = getStrategy(strategyKey);
   return strategy.rules[decideLeadLevel(tier)];

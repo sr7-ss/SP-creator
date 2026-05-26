@@ -21,8 +21,8 @@ const modules = [
   },
   {
     icon: BarChart3,
-    titleZh: 'KSP 卖点分级',
-    titleEn: 'KSP Grading',
+    titleZh: 'SP 卖点分级',
+    titleEn: 'SP Grading',
     descZh: 'AI驱动的卖点分类与优先级排序',
     descEn: 'AI-powered selling point classification',
     tag: { zh: '分析', en: 'ANALYSIS' },

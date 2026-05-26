@@ -333,7 +333,7 @@ export async function runResearchPipeline(
     {"rank": 1, "topic": "拍照夜景", "mentionRate": "5/12", "finding": "一句话总结", "quotes": ["用户原话1", "用户原话2"]},
     {"rank": 2, "topic": "...", "mentionRate": "N/M", "finding": "...", "quotes": ["...", "..."]}
   ],
-  "kspRecommendations": ["建议1", "建议2", "建议3"]
+  "spRecommendations": ["建议1", "建议2", "建议3"]
 }`;
 
   const totalSnippets = totalSources;
@@ -467,7 +467,7 @@ ${jsonTemplate}`;
     success: true,
     summary: rawText || (zh ? '报告生成完成' : 'Report generated.'),
     data: {
-      report: { summary: rawText, topPros: [], topCons: [], kspRecommendations: [], sources },
+      report: { summary: rawText, topPros: [], topCons: [], spRecommendations: [], sources },
       sources,
     },
   };

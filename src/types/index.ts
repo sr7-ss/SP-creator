@@ -22,18 +22,18 @@ export interface Project {
   products: Product[];
 }
 
-// === KSP Types ===
+// === SP Types ===
 
-export type KspTier = 0 | 1 | 2 | 3;
+export type SpTier = 0 | 1 | 2 | 3;
 
 export interface SloganAlternative {
   text: string;
   type: string; // SloganType
 }
 
-export interface KspItem {
+export interface SpItem {
   id: string;
-  tier: KspTier;
+  tier: SpTier;
   featureName: string; // 参数名
   paramValue: string; // 参数值
   reasoning?: string; // AI 分级理由
@@ -199,8 +199,8 @@ export interface ResearchReport {
   topCons: ResearchMention[];
   /** 竞品卖点话术对比 */
   competitorMessaging: CompetitorMessagingItem[];
-  /** 对 KSP 分级和包装的建议 */
-  kspRecommendations: string[];
+  /** 对 SP 分级和包装的建议 */
+  spRecommendations: string[];
   /** 原始数据来源 */
   sources: { url: string; type: string; snippetCount: number }[];
 }
@@ -244,11 +244,11 @@ export interface ReviewInsight {
   actionableInsight?: string;
 }
 
-export interface KspAdjustmentSuggestion {
+export interface SpAdjustmentSuggestion {
   id: string;
   featureName: string;
-  currentTier?: KspTier;
-  suggestedTier: KspTier;
+  currentTier?: SpTier;
+  suggestedTier: SpTier;
   reason: string;
   direction: 'promote' | 'demote' | 'add' | 'keep';
   confidence: number; // 0-1
@@ -258,7 +258,7 @@ export interface ReviewMiningResult {
   summary: ReviewBatchSummary;
   items: ReviewItemResult[];
   themes: ReviewInsight[];
-  kspSuggestions?: KspAdjustmentSuggestion[];
+  spSuggestions?: SpAdjustmentSuggestion[];
   specComparisons?: Record<string, unknown>;
 }
 

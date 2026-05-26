@@ -1,6 +1,6 @@
 /**
- * KSP Agent: Uses Anthropic SDK with tool_use to orchestrate the full
- * competitor analysis → KSP grading → packaging pipeline.
+ * SP Agent: Uses Anthropic SDK with tool_use to orchestrate the full
+ * competitor analysis → SP grading → packaging pipeline.
  *
  * The Agent decides which tools to call and in what order.
  * Progress is reported via a callback for SSE streaming.
@@ -32,7 +32,7 @@ interface AgentConfig {
   packagingProvider: string;
   packagingApiKey: string;
   packagingModel: string;
-  /** If true, skip packaging step — user will review KSP first (human-in-the-loop) */
+  /** If true, skip packaging step — user will review SP first (human-in-the-loop) */
   skipPackaging?: boolean;
 }
 
@@ -45,7 +45,7 @@ type ProgressCallback = (event: {
 interface AgentResult {
   success: boolean;
   summary: string;
-  kspItems?: Array<{ tier: number; featureName: string; paramValue: string }>;
+  spItems?: Array<{ tier: number; featureName: string; paramValue: string }>;
   competitors?: Array<{ name: string; params: Record<string, string> }>;
   analysis?: unknown;
   error?: string;
@@ -68,7 +68,7 @@ const TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'run_comparison',
-    description: 'Run competitive analysis comparing own product against competitors. Uses rule-based engine (no AI). Returns analysis + KSP tier assignments.',
+    description: 'Run competitive analysis comparing own product against competitors. Uses rule-based engine (no AI). Returns analysis + SP tier assignments.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -97,11 +97,11 @@ const TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'generate_packaging',
-    description: 'Generate L1/L2/L3 selling point packaging for KSP items using AI. Returns marketing copy for each feature.',
+    description: 'Generate L1/L2/L3 selling point packaging for SP items using AI. Returns marketing copy for each feature.',
     input_schema: {
       type: 'object' as const,
       properties: {
-        kspItems: {
+        spItems: {
           type: 'array',
           items: {
             type: 'object',
@@ -116,12 +116,12 @@ const TOOLS: Anthropic.Tool[] = [
         segment: { type: 'string' },
         competitorContext: { type: 'string' },
       },
-      required: ['kspItems', 'productName'],
+      required: ['spItems', 'productName'],
     },
   },
   {
     name: 'save_results',
-    description: 'Save all results (competitor products, analysis, KSP items) to the database.',
+    description: 'Save all results (competitor products, analysis, SP items) to the database.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -135,7 +135,7 @@ const TOOLS: Anthropic.Tool[] = [
             },
           },
         },
-        kspItems: {
+        spItems: {
           type: 'array',
           items: {
             type: 'object',
@@ -150,7 +150,7 @@ const TOOLS: Anthropic.Tool[] = [
           },
         },
       },
-      required: ['competitors', 'kspItems'],
+      required: ['competitors', 'spItems'],
     },
   },
 ];
@@ -223,26 +223,26 @@ function handleComparison(
   input: { ownProduct: { name: string; params: Record<string, string> }; competitors: Array<{ name: string; params: Record<string, string> }> },
   onProgress: ProgressCallback
 ): string {
-  onProgress({ step: 'analysis', detail: '正在运行竞品分析和 KSP 分级...', progress: 0.5 });
+  onProgress({ step: 'analysis', detail: '正在运行竞品分析和 SP 分级...', progress: 0.5 });
 
-  const { analysis, kspItems } = analyzeAndTier(
+  const { analysis, spItems } = analyzeAndTier(
     input.ownProduct,
     input.competitors,
     'zh'
   );
 
-  return JSON.stringify({ analysis, kspItems });
+  return JSON.stringify({ analysis, spItems });
 }
 
 async function handlePackaging(
-  input: { kspItems: Array<{ tier: number; featureName: string; paramValue: string }>; productName: string; segment?: string; competitorContext?: string },
+  input: { spItems: Array<{ tier: number; featureName: string; paramValue: string }>; productName: string; segment?: string; competitorContext?: string },
   config: AgentConfig,
   onProgress: ProgressCallback
 ): Promise<string> {
   onProgress({ step: 'packaging', detail: '正在生成卖点包装...', progress: 0.7 });
 
   const result = await runPackaging({
-    kspItems: input.kspItems,
+    spItems: input.spItems,
     productName: input.productName,
     segment: input.segment || '',
     competitorContext: input.competitorContext || '',
@@ -261,7 +261,7 @@ async function handlePackaging(
 async function handleSave(
   input: {
     competitors: Array<{ name: string; params: Record<string, string> }>;
-    kspItems: Array<{ tier: number; featureName: string; paramValue: string; l1Name?: string; l2Slogan?: string; l2SloganType?: string; l2Alternatives?: unknown; l3Details?: unknown }>;
+    spItems: Array<{ tier: number; featureName: string; paramValue: string; l1Name?: string; l2Slogan?: string; l2SloganType?: string; l2Alternatives?: unknown; l3Details?: unknown }>;
     analysis?: unknown;
   },
   config: AgentConfig,
@@ -300,10 +300,10 @@ async function handleSave(
     }
   }
 
-  // Save KSP results
-  await prisma.kspResult.deleteMany({ where: { projectId: config.projectId } });
-  for (const [idx, ksp] of input.kspItems.entries()) {
-    await prisma.kspResult.create({
+  // Save SP results
+  await prisma.spResult.deleteMany({ where: { projectId: config.projectId } });
+  for (const [idx, ksp] of input.spItems.entries()) {
+    await prisma.spResult.create({
       data: {
         projectId: config.projectId,
         tier: ksp.tier,
@@ -361,10 +361,10 @@ export async function runAgent(
 
   const skipPkg = !!config.skipPackaging;
 
-  const systemPrompt = `You are a KSP (Key Selling Point) analysis agent for mobile phones.
+  const systemPrompt = `You are a SP (Selling Point) analysis agent for mobile phones.
 You have access to tools to:
 1. Fetch device specs from the web (works for BOTH own product and competitors)
-2. Run competitive analysis and KSP tier assignment
+2. Run competitive analysis and SP tier assignment
 ${skipPkg ? '' : '3. Generate selling point packaging (L1 name, L2 slogan, L3 sub-points)\n'}${skipPkg ? '3' : '4'}. Save results to the database
 
 The user's own product is: ${config.ownProductName}
@@ -380,7 +380,7 @@ ${ownHasParams ? '2' : '3'}. Run comparison (pass own product with params + comp
 ${skipPkg ? '' : `${ownHasParams ? '3' : '4'}. Generate packaging\n`}${skipPkg ? (ownHasParams ? '3' : '4') : (ownHasParams ? '4' : '5')}. Save results
 
 IMPORTANT: When calling run_comparison, you MUST include the own product's params (either from above or from fetch_competitor_specs result). Do NOT pass empty params.
-Always call save_results at the end to persist everything.${skipPkg ? '\nDo NOT call generate_packaging — the user will review KSP tiers first and generate packaging separately.' : ''}
+Always call save_results at the end to persist everything.${skipPkg ? '\nDo NOT call generate_packaging — the user will review SP tiers first and generate packaging separately.' : ''}
 Respond in ${config.locale === 'zh' ? 'Chinese' : 'English'}.`;
 
   const messages: Anthropic.MessageParam[] = [
@@ -392,7 +392,7 @@ Respond in ${config.locale === 'zh' ? 'Chinese' : 'English'}.`;
   // Track data across tool calls
   const competitorData: Array<{ name: string; params: Record<string, string> }> = [];
   let ownProductParams = { ...config.ownProductParams }; // may be enriched by fetch_competitor_specs
-  let lastKspItems: Array<{ tier: number; featureName: string; paramValue: string; l1Name?: string; l2Slogan?: string; l2SloganType?: string; l2Alternatives?: NormalizedPackaging['l2Alternatives']; l3Details?: NormalizedPackaging['l3Details'] }> = [];
+  let lastSpItems: Array<{ tier: number; featureName: string; paramValue: string; l1Name?: string; l2Slogan?: string; l2SloganType?: string; l2Alternatives?: NormalizedPackaging['l2Alternatives']; l3Details?: NormalizedPackaging['l3Details'] }> = [];
   let lastAnalysis: unknown = null;
 
   while (iterations < maxIterations) {
@@ -412,7 +412,7 @@ Respond in ${config.locale === 'zh' ? 'Chinese' : 'English'}.`;
       return {
         success: true,
         summary: textBlock ? (textBlock as Anthropic.TextBlock).text : 'Analysis completed.',
-        kspItems: lastKspItems,
+        spItems: lastSpItems,
         competitors: competitorData,
         analysis: lastAnalysis,
       };
@@ -425,7 +425,7 @@ Respond in ${config.locale === 'zh' ? 'Chinese' : 'English'}.`;
       return {
         success: true,
         summary: textBlock ? (textBlock as Anthropic.TextBlock).text : 'Analysis completed.',
-        kspItems: lastKspItems,
+        spItems: lastSpItems,
         competitors: competitorData,
         analysis: lastAnalysis,
       };
@@ -477,18 +477,18 @@ Respond in ${config.locale === 'zh' ? 'Chinese' : 'English'}.`;
           case 'run_comparison': {
             result = handleComparison(toolUse.input as Parameters<typeof handleComparison>[0], onProgress);
             const parsed = JSON.parse(result);
-            lastKspItems = parsed.kspItems;
+            lastSpItems = parsed.spItems;
             lastAnalysis = parsed.analysis;
             break;
           }
           case 'generate_packaging': {
             result = await handlePackaging(toolUse.input as Parameters<typeof handlePackaging>[0], config, onProgress);
-            // Parse packaging results and merge into kspItems (now includes l3Details)
+            // Parse packaging results and merge into spItems (now includes l3Details)
             try {
               const parsed = JSON.parse(result);
               const pkgArray: NormalizedPackaging[] = parsed.packagingResults || [];
               for (const pkg of pkgArray) {
-                const match = lastKspItems.find(k =>
+                const match = lastSpItems.find(k =>
                   k.featureName.toLowerCase().includes(pkg.featureName?.toLowerCase() || '') ||
                   (pkg.featureName || '').toLowerCase().includes(k.featureName.toLowerCase())
                 );
@@ -509,8 +509,8 @@ Respond in ${config.locale === 'zh' ? 'Chinese' : 'English'}.`;
             if (saveInput.competitors.length === 0 && competitorData.length > 0) {
               saveInput.competitors = competitorData;
             }
-            if (saveInput.kspItems.length === 0 && lastKspItems.length > 0) {
-              saveInput.kspItems = lastKspItems;
+            if (saveInput.spItems.length === 0 && lastSpItems.length > 0) {
+              saveInput.spItems = lastSpItems;
             }
             // Always pass analysis from the comparison step
             saveInput.analysis = lastAnalysis;

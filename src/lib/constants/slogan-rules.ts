@@ -103,8 +103,8 @@ export const L3_PACKAGING_TECHNIQUES = `
 | 需要制造记忆点的 T1 卖点 | equivalent 或 extreme |
 `;
 
-export const KSP_TIER_RULES = `
-## KSP 分级规则
+export const SP_TIER_RULES = `
+## SP 分级规则
 
 ### 核心决策原则
 用户关注度 > 参数领先度。即使参数在价位段最强，如果用户不关心这个参数，也不能放 T1。

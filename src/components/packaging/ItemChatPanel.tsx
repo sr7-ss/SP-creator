@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, X, Loader2, Trash2, Bot, Sparkles, Wand2, Swords, MessageSquare, Check, Plus, Combine, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { KspItem, SloganType } from '@/types';
+import { SpItem, SloganType } from '@/types';
 import { loadSettings, getConfigForTask, AppSettings } from '@/lib/settings';
 import { cn } from '@/lib/utils';
 import ModelSelector from '@/components/ModelSelector';
@@ -37,18 +37,18 @@ interface BlockContext {
   type: string;
   label: { zh: string; en: string };
   guide: { zh: string; en: string };
-  pills: { zh: string; en: string; prompt: (item: KspItem, zh: boolean) => string }[];
+  pills: { zh: string; en: string; prompt: (item: SpItem, zh: boolean) => string }[];
   index?: number;
 }
 
 interface ItemChatPanelProps {
-  item: KspItem;
+  item: SpItem;
   productName: string;
   segment?: string;
   competitorContext?: string;
   projectContext: string;
   projectId: string;
-  onApply: (itemId: string, updates: Partial<KspItem>) => void;
+  onApply: (itemId: string, updates: Partial<SpItem>) => void;
   locale: string;
   activeContext?: BlockContext | null;
 }
@@ -69,7 +69,7 @@ const sloganTypeLabels: Record<SloganType, { zh: string; en: string }> = {
 
 // ─── Helpers ─────────────────────────────────────────────────
 
-function buildItemContext(item: KspItem, productName: string, segment?: string, competitorContext?: string, projectContext?: string, locale?: string): string {
+function buildItemContext(item: SpItem, productName: string, segment?: string, competitorContext?: string, projectContext?: string, locale?: string): string {
   const zh = locale === 'zh';
   const altText = item.l2Alternatives?.map(a => `"${a.text}" (${a.type})`).join(', ') || (zh ? '无' : 'None');
   const l3Text = item.l3Details?.map(d => `${d.name}: ${d.description} [${d.technique}]`).join('\n  ') || (zh ? '无' : 'None');
@@ -450,7 +450,7 @@ export default function ItemChatPanel({
               <Button
                 size="sm"
                 onClick={() => {
-                  const updates: Partial<KspItem> = { l2Slogan: variant.l2Slogan, l2SloganType: variant.l2SloganType };
+                  const updates: Partial<SpItem> = { l2Slogan: variant.l2Slogan, l2SloganType: variant.l2SloganType };
                   if (variant.l1Name) updates.l1Name = variant.l1Name;
                   onApply(item.id, updates);
                 }}

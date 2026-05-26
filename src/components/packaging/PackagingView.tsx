@@ -2,16 +2,16 @@
 
 import { Loader2, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { KspItem, L3SubPoint } from '@/types';
+import { SpItem, L3SubPoint } from '@/types';
 import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
 interface PackagingViewProps {
-  items: KspItem[];
+  items: SpItem[];
   onGenerate?: () => void;
-  onItemUpdate?: (itemId: string, updates: Partial<KspItem>) => void;
+  onItemUpdate?: (itemId: string, updates: Partial<SpItem>) => void;
   onDeleteItem?: (itemId: string) => void;
-  onSelectItem: (item: KspItem) => void;
+  onSelectItem: (item: SpItem) => void;
   isGenerating?: boolean;
   extraButtons?: React.ReactNode;
 }
@@ -45,7 +45,7 @@ export default function PackagingView({
           </div>
           <div className="text-center">
             <p className="text-base font-medium text-slate-700">
-              {zh ? '为每个 KSP 生成三层卖点包装' : 'Generate 3-layer packaging for each KSP'}
+              {zh ? '为每个 SP 生成三层卖点包装' : 'Generate 3-layer packaging for each SP'}
             </p>
             <p className="text-xs text-slate-400 mt-1">
               {zh ? 'L1 卖点名称 · L2 Slogan · L3 子卖点' : 'L1 Feature Name · L2 Slogan · L3 Sub-points'}

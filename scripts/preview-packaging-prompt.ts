@@ -19,13 +19,13 @@ const rawItems = [
   { tier: 2, featureName: '屏幕', paramValue: '6.78英寸 OLED 120Hz' },
   { tier: 3, featureName: '防护', paramValue: 'IP64' },
 ];
-const kspItems = rawItems.map(it => ({
+const spItems = rawItems.map(it => ({
   ...it,
   sloganHint: formatSloganHint(decideSloganTypeForKsp(strategyKey, it.tier)),
 }));
 
 const userPrompt = getPackagingUserPrompt({
-  kspItems,
+  spItems,
   productName: 'Realme GT 7 Pro',
   segment: '2000-2500 元',
   positioning: {

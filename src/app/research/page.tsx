@@ -214,11 +214,11 @@ function ReportCard({ report, zh }: { report: SavedReport; zh: boolean }) {
             </div>
           )}
 
-          {/* KSP recommendations */}
+          {/* SP recommendations */}
           {report.recommendations && report.recommendations.length > 0 && (
             <div>
               <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-                {zh ? 'KSP 建议' : 'KSP Recommendations'}
+                {zh ? 'SP 建议' : 'SP Recommendations'}
               </p>
               <div className="space-y-1.5">
                 {report.recommendations.map((rec, idx) => (
@@ -381,7 +381,7 @@ export default function ResearchPage() {
         topPros: (report?.topPros as { rank: number; topic: string; mentionRate: string; finding: string; quotes: string[] }[]) || [],
         topCons: (report?.topCons as { rank: number; topic: string; mentionRate: string; finding: string; quotes: string[] }[]) || [],
         messaging: (report?.competitorMessaging as { competitor: string; feature: string; messaging: string }[]) || [],
-        recommendations: (report?.kspRecommendations as string[]) || [],
+        recommendations: (report?.spRecommendations as string[]) || [],
         sources: (data?.sources as { url: string; type: string; snippetCount: number }[]) || (report?.sources as { url: string; type: string; snippetCount: number }[]) || [],
       };
 
@@ -400,7 +400,7 @@ export default function ResearchPage() {
             body: JSON.stringify({
               projectId: selectedProjectId,
               query: prompt,
-              report: report || { summary: textSummary, topPros: [], topCons: [], kspRecommendations: [], sources: displayReport.sources },
+              report: report || { summary: textSummary, topPros: [], topCons: [], spRecommendations: [], sources: displayReport.sources },
             }),
           });
           fetchReports();
@@ -504,7 +504,7 @@ export default function ResearchPage() {
         <p className="text-sm text-slate-500 mt-1">
           {zh
             ? '在做决策之前，先收集市场情报。调研报告将自动保存，并注入到你的卖点分级和卖点包装中。'
-            : 'Gather market intelligence before making decisions. Reports auto-save and feed into your KSP tiering and packaging.'}
+            : 'Gather market intelligence before making decisions. Reports auto-save and feed into your SP tiering and packaging.'}
         </p>
       </div>
 
@@ -772,12 +772,12 @@ export default function ResearchPage() {
             </div>
           )}
 
-          {/* KSP recommendations — compact pills */}
+          {/* SP recommendations — compact pills */}
           {latestReport.recommendations.length > 0 && (
             <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
               <div className="flex items-start gap-2">
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex-shrink-0 mt-0.5">
-                  {zh ? 'KSP 建议' : 'KSP'}
+                  {zh ? 'SP 建议' : 'SP'}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {latestReport.recommendations.map((rec, idx) => (
@@ -823,7 +823,7 @@ export default function ResearchPage() {
           </span>
           <ArrowRight className="h-3 w-3 text-slate-400" />
           <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600">
-            {zh ? '3. 卖点分级' : '3. KSP Tier'}
+            {zh ? '3. 卖点分级' : '3. SP Tier'}
           </span>
           <ArrowRight className="h-3 w-3 text-slate-400" />
           <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600">

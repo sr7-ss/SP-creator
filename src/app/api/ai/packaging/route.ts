@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const { userId } = await requireAuth();
     const body = await request.json();
     const {
-      kspItems,
+      spItems,
       productName,
       segment,
       competitorContext,
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await runPackaging({
-      kspItems,
+      spItems,
       productName,
       segment: segment || '',
       competitorContext: competitorContext || '',

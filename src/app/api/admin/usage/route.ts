@@ -80,7 +80,7 @@ export async function GET(req: Request) {
       byDay.set(d, cur);
     }
 
-    // ── AI quality signal: average user edit fraction on AI-generated KSP ──
+    // ── AI quality signal: average user edit fraction on AI-generated SP ──
     const editEvents = await prisma.trackEvent.findMany({
       where: { name: 'ai_output_edited', createdAt: { gte: since } },
       select: { props: true },

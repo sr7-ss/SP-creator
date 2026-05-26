@@ -5,7 +5,7 @@ import { Check, ChevronLeft, ChevronRight, History, Sparkles, Loader2 } from 'lu
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { KspItem, PackagingVersion, SloganType, L3SubPoint } from '@/types';
+import { SpItem, PackagingVersion, SloganType, L3SubPoint } from '@/types';
 import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
@@ -30,7 +30,7 @@ const techniqueLabels: Record<string, { en: string; zh: string }> = {
 interface VersionCompareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item: KspItem;
+  item: SpItem;
   /** Called when user picks a version to use */
   onSelectVersion: (itemId: string, version: PackagingVersion) => void;
   /** Called when user wants to continue refining */

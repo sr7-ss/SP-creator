@@ -1,5 +1,5 @@
 /**
- * Prompts for batch review sentiment analysis and KSP dimension mapping.
+ * Prompts for batch review sentiment analysis and SP dimension mapping.
  */
 
 const DIMENSIONS = [

@@ -4,12 +4,12 @@ import { useState, useCallback } from 'react';
 import { Presentation, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/store';
 import { PARAM_CATEGORIES } from '@/lib/constants/param-weights';
-import { KspItem, CompetitiveAnalysis } from '@/types';
+import { SpItem, CompetitiveAnalysis } from '@/types';
 
 interface ExportPptButtonProps {
   projectName: string;
   segment?: string;
-  kspItems: KspItem[];
+  spItems: SpItem[];
   analysis: CompetitiveAnalysis | null;
   products: { id: string; name: string; isOwnProduct: boolean; values: Record<string, string> }[];
 }
@@ -32,7 +32,7 @@ const COLORS = {
   blueLight: 'EFF6FF',
 };
 
-export default function ExportPptButton({ projectName, segment, kspItems, analysis, products }: ExportPptButtonProps) {
+export default function ExportPptButton({ projectName, segment, spItems, analysis, products }: ExportPptButtonProps) {
   const { locale } = useTranslation();
   const zh = locale === 'zh';
   const [exporting, setExporting] = useState(false);
@@ -57,8 +57,8 @@ export default function ExportPptButton({ projectName, segment, kspItems, analys
       });
       titleSlide.addText(
         segment
-          ? `${zh ? 'KSP 卖点分析报告' : 'KSP Selling Point Analysis'} — ${segment}`
-          : (zh ? 'KSP 卖点分析报告' : 'KSP Selling Point Analysis'),
+          ? `${zh ? 'SP 卖点分析报告' : 'SP Selling Point Analysis'} — ${segment}`
+          : (zh ? 'SP 卖点分析报告' : 'SP Selling Point Analysis'),
         {
           x: 0.8, y: 3.2, w: 11.7, h: 0.6,
           fontSize: 18, fontFace: 'Arial', color: '94A3B8',
@@ -174,10 +174,10 @@ export default function ExportPptButton({ projectName, segment, kspItems, analys
         });
       }
 
-      // ─── Slide 4: KSP Tier Overview ───
-      if (kspItems.length > 0) {
-        const kspSlide = pres.addSlide();
-        kspSlide.addText(zh ? '卖点分级' : 'KSP Tier Classification', {
+      // ─── Slide 4: SP Tier Overview ───
+      if (spItems.length > 0) {
+        const spSlide = pres.addSlide();
+        spSlide.addText(zh ? '卖点分级' : 'SP Tier Classification', {
           x: 0.5, y: 0.3, w: 12, h: 0.6,
           fontSize: 24, fontFace: 'Arial', color: COLORS.slateDark, bold: true,
         });
@@ -189,33 +189,33 @@ export default function ExportPptButton({ projectName, segment, kspItems, analys
         ];
 
         tierConfigs.forEach((tc, colIdx) => {
-          const tierItems = kspItems.filter(i => i.tier === tc.tier);
+          const tierItems = spItems.filter(i => i.tier === tc.tier);
           const x = 0.5 + colIdx * 4.1;
 
-          kspSlide.addShape(pres.ShapeType.roundRect, {
+          spSlide.addShape(pres.ShapeType.roundRect, {
             x, y: 1.1, w: 3.8, h: 0.45,
             fill: { color: tc.bg },
             rectRadius: 0.05,
           });
-          kspSlide.addText(`${tc.label} (${tierItems.length})`, {
+          spSlide.addText(`${tc.label} (${tierItems.length})`, {
             x: x + 0.15, y: 1.15, w: 3.5, h: 0.35,
             fontSize: 13, fontFace: 'Arial', color: tc.color, bold: true,
           });
 
           tierItems.slice(0, 8).forEach((item, idx) => {
             const y = 1.7 + idx * 0.55;
-            kspSlide.addShape(pres.ShapeType.roundRect, {
+            spSlide.addShape(pres.ShapeType.roundRect, {
               x, y, w: 3.8, h: 0.45,
               fill: { color: COLORS.white },
               shadow: { type: 'outer', blur: 3, offset: 1, color: '00000010' },
               rectRadius: 0.05,
               line: { color: COLORS.medGray, width: 0.5 },
             });
-            kspSlide.addText(item.featureName, {
+            spSlide.addText(item.featureName, {
               x: x + 0.15, y: y + 0.02, w: 2.5, h: 0.2,
               fontSize: 10, fontFace: 'Arial', color: COLORS.slateDark, bold: true,
             });
-            kspSlide.addText(item.paramValue, {
+            spSlide.addText(item.paramValue, {
               x: x + 0.15, y: y + 0.22, w: 3.5, h: 0.18,
               fontSize: 8, fontFace: 'Arial', color: COLORS.slateText,
             });
@@ -224,7 +224,7 @@ export default function ExportPptButton({ projectName, segment, kspItems, analys
       }
 
       // ─── Slides 5+: Packaging per tier ───
-      const packaged = kspItems.filter(i => i.l1Name);
+      const packaged = spItems.filter(i => i.l1Name);
       if (packaged.length > 0) {
         for (const tc of [
           { tier: 1, label: zh ? 'T1 核心卖点包装' : 'T1 Core Packaging', color: COLORS.red, bg: COLORS.redLight },
@@ -357,13 +357,13 @@ export default function ExportPptButton({ projectName, segment, kspItems, analys
         }
       }
 
-      await pres.writeFile({ fileName: `${projectName}-KSP.pptx` });
+      await pres.writeFile({ fileName: `${projectName}-SP.pptx` });
     } catch (err) {
       console.error('PPT export failed:', err);
     } finally {
       setExporting(false);
     }
-  }, [exporting, projectName, segment, kspItems, analysis, products, zh, locale]);
+  }, [exporting, projectName, segment, spItems, analysis, products, zh, locale]);
 
   return (
     <button

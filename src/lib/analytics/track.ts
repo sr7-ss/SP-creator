@@ -11,7 +11,7 @@ import { loadSettings } from '@/lib/settings';
 
 export type TrackProps = Record<string, string | number | boolean | null>;
 
-const SESSION_KEY = 'ksp-track-session';
+const SESSION_KEY = 'sp-track-session';
 
 function getSessionId(): string {
   if (typeof window === 'undefined') return '';

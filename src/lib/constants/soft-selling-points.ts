@@ -1,7 +1,7 @@
 /**
  * Soft selling points — features that don't have direct parameter comparisons
  * but are important for marketing positioning.
- * These are appended as tier=0 (unassigned) if not already present in the KSP results.
+ * These are appended as tier=0 (unassigned) if not already present in the SP results.
  */
 export const SOFT_SELLING_POINTS = [
   { key: 'ai_features', nameEn: 'AI Features', nameZh: 'AI 能力' },

@@ -1,10 +1,10 @@
-import { KSP_TIER_RULES } from '@/lib/constants/slogan-rules';
+import { SP_TIER_RULES } from '@/lib/constants/slogan-rules';
 import { DEFAULT_PARAM_WEIGHTS } from '@/lib/constants/param-weights';
 
 /**
- * 生成KSP分级的 System Prompt
+ * 生成SP分级的 System Prompt
  */
-export function getKspTierSystemPrompt(locale: string): string {
+export function getSpTierSystemPrompt(locale: string): string {
   const lang = locale === 'zh' ? '中文' : 'English';
 
   const weightsText = DEFAULT_PARAM_WEIGHTS
@@ -15,7 +15,7 @@ export function getKspTierSystemPrompt(locale: string): string {
     }, {} as Record<number, string[]>);
 
   return `<role>
-你是一位资深手机产品策略师，专注 KSP（Key Selling Point）分级决策。
+你是一位资深手机产品策略师，专注 SP（Selling Point）分级决策。
 你的核心能力：判断哪些参数优势能打动消费者，哪些只是纸面好看。
 你的决策原则：用户关注度 > 参数领先度。芯片再强，如果这个价位段用户不关心性能，也不能放 T1。
 </role>
@@ -32,7 +32,7 @@ export function getKspTierSystemPrompt(locale: string): string {
 </task>
 
 <rules>
-${KSP_TIER_RULES}
+${SP_TIER_RULES}
 
 ## 用户关注度权重表
 | 关注度 | 参数类型 |
@@ -97,7 +97,7 @@ tier 字段必须是数字（1/2/3）。
 按 tier 排序（T1 在前），同 tier 内按重要性排序。
 
 {
-  "kspItems": [
+  "spItems": [
     {
       "tier": 1,
       "featureName": "参数名称",
@@ -118,9 +118,9 @@ tier 字段必须是数字（1/2/3）。
 }
 
 /**
- * 生成KSP分级的 User Prompt
+ * 生成SP分级的 User Prompt
  */
-export function getKspTierUserPrompt(
+export function getSpTierUserPrompt(
   analysisResult: string,
   ownProductName: string,
   segment?: string
@@ -133,7 +133,7 @@ export function getKspTierUserPrompt(
 ${analysisResult}
 </competitive_analysis>
 
-请根据以上竞品分析结果，生成 KSP 分级。记住：
+请根据以上竞品分析结果，生成 SP 分级。记住：
 - 分析 advantages 中的条目用于 T1/T2 候选
 - 分析 neutral 中的条目用于 T2/T3 候选
 - 分析 disadvantages 中的条目，如果用户关注度低且参数可接受，可以放 T3

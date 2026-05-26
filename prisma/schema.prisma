@@ -102,8 +102,8 @@ model Project {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   products        Product[]
-  kspResults      KspResult[]
-  kspVersions     KspVersion[]
+  spResults      SpResult[]
+  spVersions     SpVersion[]
   analyses        Analysis[]
   reviewBatches   ReviewBatch[]
   researchReports ResearchReport[]
@@ -132,7 +132,7 @@ model Analysis {
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
-model KspResult {
+model SpResult {
   id           String  @id @default(cuid())
   projectId    String
   tier         Int
@@ -147,6 +147,9 @@ model KspResult {
   sortOrder       Int     @default(0)
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Keep the existing DB table name on rename (was KspResult). Code uses SpResult.
+  @@map("KspResult")
 }
 
 model Knowledge {
@@ -168,7 +171,7 @@ model Knowledge {
 model SellingPointTemplate {
   id            String   @id @default(cuid())
   userId        String
-  matchFeatures Json     // string[] — KSP feature names that trigger this template, e.g. ["电池","快充"]
+  matchFeatures Json     // string[] — SP feature names that trigger this template, e.g. ["电池","快充"]
   parentName    String   // marketing name, e.g. "8000mAh Titan Battery + 45W Fast Charge"
   parentSlogan  String?  // overall slogan
   subFeatures   Json     // { name: string, fromFeature?: string }[] — ordered sub-selling-points
@@ -204,19 +207,21 @@ model KnowledgeEntry {
   @@index([userId, parentFeature])
 }
 
-// ─── KSP Version Snapshots ──────────────────────────────────
+// ─── SP Version Snapshots ──────────────────────────────────
 
-model KspVersion {
+model SpVersion {
   id        String   @id @default(cuid())
   projectId String
   name      String   // e.g. "方案A：主打续航"
-  snapshot  Json     // KspItem[] snapshot
+  snapshot  Json     // SpItem[] snapshot
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
+  // Keep the existing DB table name on rename (was KspVersion). Code uses SpVersion.
+  @@map("KspVersion")
 }
 
 // ─── Deep Research Reports ───────────────────────────────────

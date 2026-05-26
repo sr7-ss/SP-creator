@@ -3,7 +3,7 @@
  * Clears all derived data for a project:
  *   - Competitor products (non-own)
  *   - Analysis records
- *   - KSP results
+ *   - SP results
  * Keeps the project itself and the own product.
  */
 
@@ -28,9 +28,9 @@ export async function POST(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    // Delete in order: KSP results → Analysis → Competitor products
+    // Delete in order: SP results → Analysis → Competitor products
     await prisma.$transaction([
-      prisma.kspResult.deleteMany({ where: { projectId: id } }),
+      prisma.spResult.deleteMany({ where: { projectId: id } }),
       prisma.analysis.deleteMany({ where: { projectId: id } }),
       prisma.product.deleteMany({ where: { projectId: id, isOwnProduct: false } }),
     ]);

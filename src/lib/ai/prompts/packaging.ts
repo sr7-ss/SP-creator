@@ -22,7 +22,7 @@ export function getPackagingSystemPrompt(locale: string, brandRules?: string[]):
 </角色>
 
 <任务>
-为每个 KSP（Key Selling Point）生成三层包装。每个卖点都要认真包装，讲清价值和利益点。
+为每个 SP（Selling Point）生成三层包装。每个卖点都要认真包装，讲清价值和利益点。
 
 第一步：这个参数对用户最大的价值是什么？（不是参数本身，是用户能感知的好处）
 第二步：这个价值用哪种 Slogan 类型最有杀伤力？（factual/functional/emotional）
@@ -64,7 +64,7 @@ ${SLOGAN_TYPE_DEFINITIONS}
 ${SLOGAN_EXTREME_WORDS}
 ${SLOGAN_QUALITY_BAR}
 
-重要：每个 KSP 在 <待包装> 块里的行尾会有一条**决策提示**，形如 \`[主 Slogan 用写实型，可用极限词]\` 或 \`[主 Slogan 用功能型]\`。**主 Slogan 必须严格按提示的类型生成**，并把对应的 type 字段填进 \`l2SloganType\`；2 条备选请覆盖另外两种类型，让用户后续可切换。
+重要：每个 SP 在 <待包装> 块里的行尾会有一条**决策提示**，形如 \`[主 Slogan 用写实型，可用极限词]\` 或 \`[主 Slogan 用功能型]\`。**主 Slogan 必须严格按提示的类型生成**，并把对应的 type 字段填进 \`l2SloganType\`；2 条备选请覆盖另外两种类型，让用户后续可切换。
 只有提示中标注"可用极限词"的条目才允许使用"最强"/"首个"/"唯一"/"第一档"等极限词；否则禁用。
 
 ## L3：子卖点拆解
@@ -179,11 +179,11 @@ ${brandRulesBlock}
  */
 export interface PackagingUserPromptArgs {
   /**
-   * KSP items to package this batch. `sloganHint` is an optional per-row decision string
+   * SP items to package this batch. `sloganHint` is an optional per-row decision string
    * (e.g. "[主 Slogan 用写实型，可用极限词]") that overrides the model's type-selection
    * judgment. When provided, it is appended to the row in the <待包装> block.
    */
-  kspItems: { tier: number; featureName: string; paramValue: string; sloganHint?: string }[];
+  spItems: { tier: number; featureName: string; paramValue: string; sloganHint?: string }[];
   productName: string;
   segment?: string;
   positioning?: { targetAudience?: string; productStyle?: string[]; positioning?: string };
@@ -195,7 +195,7 @@ export interface PackagingUserPromptArgs {
 
 export function getPackagingUserPrompt(args: PackagingUserPromptArgs): string {
   const {
-    kspItems, productName, segment, positioning, competitorContext,
+    spItems, productName, segment, positioning, competitorContext,
     referenceStyleBlock, researchContextBlock, refinementBlock,
   } = args;
 
@@ -243,17 +243,17 @@ export function getPackagingUserPrompt(args: PackagingUserPromptArgs): string {
   // 7. Refinement context (single-item refine path)
   if (refinementBlock) sections.push(refinementBlock);
 
-  // 8. <待包装> — the actual KSP list this batch must produce output for. Placed near
+  // 8. <待包装> — the actual SP list this batch must produce output for. Placed near
   //     the end so model attention is highest on the task object.
   const tierLabel = (tier: number) => tier === 1 ? 'T1，参数领先' : tier === 2 ? 'T2，参数持平' : 'T3，基础配置';
-  const itemsList = kspItems.map(i => {
+  const itemsList = spItems.map(i => {
     const hint = i.sloganHint ? ` ${i.sloganHint}` : '';
     return `- ${i.featureName}: ${i.paramValue} (${tierLabel(i.tier)})${hint}`;
   }).join('\n');
   sections.push(`<待包装>\n${itemsList}\n</待包装>`);
 
   // 9. <指令> — final reminder, recency advantage
-  const instruction = `请输出恰好 ${kspItems.length} 个条目，按 <待包装> 内的顺序。\n每个卖点都要认真包装，讲清价值和利益点，L3 子卖点尽可能覆盖所有角度。\n**严格按每行末尾的 [主 Slogan 用 X 型] 决定主 Slogan 类型并填写 l2SloganType；2 条备选请覆盖另外两种类型。**\n只有提示中含"可用极限词"的条目才允许使用"最强""首个""唯一"等极限词。\n具体数字无法确定的统一用大写 X 占位。`;
+  const instruction = `请输出恰好 ${spItems.length} 个条目，按 <待包装> 内的顺序。\n每个卖点都要认真包装，讲清价值和利益点，L3 子卖点尽可能覆盖所有角度。\n**严格按每行末尾的 [主 Slogan 用 X 型] 决定主 Slogan 类型并填写 l2SloganType；2 条备选请覆盖另外两种类型。**\n只有提示中含"可用极限词"的条目才允许使用"最强""首个""唯一"等极限词。\n具体数字无法确定的统一用大写 X 占位。`;
   sections.push(`<指令>\n${instruction}\n</指令>`);
 
   return sections.join('\n\n');

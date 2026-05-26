@@ -1,20 +1,20 @@
 /**
- * AI review / evaluation of a user's KSP tiering arrangement.
+ * AI review / evaluation of a user's SP tiering arrangement.
  * Returns natural language feedback, not JSON.
  */
 
-export function getKspReviewSystemPrompt(locale: string): string {
+export function getSpReviewSystemPrompt(locale: string): string {
   const zh = locale === 'zh';
 
   return zh
     ? `<role>
-你是一位有15年经验的手机产品策略顾问，专门帮产品经理审核 KSP 分级方案。
+你是一位有15年经验的手机产品策略顾问，专门帮产品经理审核 SP 分级方案。
 你的风格：像一个经验丰富的前辈在和后辈交流——先认可做得好的部分，再用启发式的方式提建议。
 你的立场：帮用户做出更有竞争力的卖点排布，不是挑毛病。
 </role>
 
 <task>
-评价用户的 KSP 分级方案，给出具体反馈。
+评价用户的 SP 分级方案，给出具体反馈。
 
 请按以下步骤思考：
 1. 先检查 T1 是否超过 3 个，是否选对了用户最关注的参数
@@ -47,13 +47,13 @@ export function getKspReviewSystemPrompt(locale: string): string {
 用中文回复。
 </output_format>`
     : `<role>
-You are a senior product strategy consultant with 15 years of experience reviewing KSP tiering decisions.
+You are a senior product strategy consultant with 15 years of experience reviewing SP tiering decisions.
 Your style: like a seasoned mentor — acknowledge what's done well, then suggest improvements with an inspiring tone.
 Your stance: help the user build a more competitive selling point lineup, not nitpick.
 </role>
 
 <task>
-Evaluate the user's KSP tiering arrangement and provide actionable feedback.
+Evaluate the user's SP tiering arrangement and provide actionable feedback.
 
 Think through these steps:
 1. Check if T1 has ≤3 items and whether they target what users care about most
@@ -74,19 +74,19 @@ Respond in English.
 </output_format>`;
 }
 
-export function getKspReviewUserPrompt(
-  kspItems: { tier: number; featureName: string; paramValue: string }[],
+export function getSpReviewUserPrompt(
+  spItems: { tier: number; featureName: string; paramValue: string }[],
   productName: string,
   segment?: string,
   locale: string = 'zh',
 ): string {
   const zh = locale === 'zh';
 
-  const t1 = kspItems.filter(i => i.tier === 1);
-  const t2 = kspItems.filter(i => i.tier === 2);
-  const t3 = kspItems.filter(i => i.tier === 3);
+  const t1 = spItems.filter(i => i.tier === 1);
+  const t2 = spItems.filter(i => i.tier === 2);
+  const t3 = spItems.filter(i => i.tier === 3);
 
-  const formatTier = (items: typeof kspItems) =>
+  const formatTier = (items: typeof spItems) =>
     items.map(i => `  - ${i.featureName}: ${i.paramValue || '(未填)'}`).join('\n');
 
   return zh

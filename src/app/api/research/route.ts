@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         topCons?: unknown[];
         userInsights?: unknown[]; // legacy
         competitorMessaging?: unknown[];
-        kspRecommendations?: string[];
+        spRecommendations?: string[];
         sources?: unknown[];
       };
     };
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
         // Store topPros/topCons in insights JSON field (new format), fallback to legacy userInsights
         insights: { topPros: report.topPros ?? [], topCons: report.topCons ?? [], legacy: report.userInsights ?? [] } as unknown as undefined,
         messaging: (report.competitorMessaging as unknown) ?? [],
-        recommendations: (report.kspRecommendations as unknown) ?? [],
+        recommendations: (report.spRecommendations as unknown) ?? [],
         sources: (report.sources as unknown) ?? [],
       },
     });

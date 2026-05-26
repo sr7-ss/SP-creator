@@ -24,7 +24,7 @@
   - 原 `SLOGAN_GENERATION_RULES` 保留为向后兼容包装（仍含 Step 1 优先级，给 creative agent 用）
 - `src/lib/ai/prompts/packaging.ts`：
   - 改用 3 个小 export 拼装 L2 段，**删除 Step 1 的优先级表**（决策已搬到代码）
-  - 加 `sloganHint?: string` 到 `kspItems` 元素，自动追加到 `<待包装>` 行尾
+  - 加 `sloganHint?: string` 到 `spItems` 元素，自动追加到 `<待包装>` 行尾
   - `<指令>` 改写：明确"按行尾 [主 Slogan 用 X 型] 决定主类型"
   - few-shot `<案例>` 输入加 hint：
     - 案例 1（电池 T1）：`[主 Slogan 用写实型，可用极限词]`
@@ -32,7 +32,7 @@
   - few-shot 输出对齐：案例 1 主 = factual placeholder，案例 2 主 = functional placeholder
 - `src/lib/ai/packaging-core.ts`：
   - 新增 `packagingStrategy?: string` 参数
-  - 用 `decideSloganTypeForKsp` 给每个 KSP 算 hint，注入 `itemsWithHints`
+  - 用 `decideSloganTypeForKsp` 给每个 SP 算 hint，注入 `itemsWithHints`
   - missing-items retry 的 prompt 也带 hint
 
 ### I：UI 弹窗
@@ -71,7 +71,7 @@
 [SLOGAN_EXTREME_WORDS — 极限词词表]
 [SLOGAN_QUALITY_BAR — 质量标准]
 
-重要：每个 KSP 在 <待包装> 块里的行尾会有一条**决策提示**，形如 [主 Slogan 用写实型，可用极限词] 或 [主 Slogan 用功能型]。**主 Slogan 必须严格按提示的类型生成**，并把对应的 type 字段填进 l2SloganType；2 条备选请覆盖另外两种类型，让用户后续可切换。
+重要：每个 SP 在 <待包装> 块里的行尾会有一条**决策提示**，形如 [主 Slogan 用写实型，可用极限词] 或 [主 Slogan 用功能型]。**主 Slogan 必须严格按提示的类型生成**，并把对应的 type 字段填进 l2SloganType；2 条备选请覆盖另外两种类型，让用户后续可切换。
 只有提示中标注"可用极限词"的条目才允许使用"最强"/"首个"/"唯一"/"第一档"等极限词；否则禁用。
 ```
 
@@ -175,5 +175,5 @@ C+I+J 之后还可以做（之前讨论过的）：
 
 不在已讨论列表里、但值得考虑的：
 
-- 策略弹窗的"自定义"档位：让高级用户在 UI 上覆盖每个 KSP 的 sloganType（场景：用户对某一条特别有想法）
+- 策略弹窗的"自定义"档位：让高级用户在 UI 上覆盖每个 SP 的 sloganType（场景：用户对某一条特别有想法）
 - 策略改写 chip 例子：现有 few-shot 案例 2 是"T1 + functional"，看起来与 value-for-money 的"T1 → factual"规则不一致；可以解释成"premium 策略下 T1 → emotional 的中间过渡"，或者把案例 2 改成 T2 + functional 让规则一致性更清晰

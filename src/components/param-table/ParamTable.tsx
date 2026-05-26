@@ -62,7 +62,7 @@ export default function ParamTable({ projectId, initialProducts, onSave, smartPa
   // Show edit tip for first 3 visits
   const [showEditTip, setShowEditTip] = useState(false);
   useEffect(() => {
-    const key = 'ksp-param-table-edit-tip-count';
+    const key = 'sp-param-table-edit-tip-count';
     const count = parseInt(localStorage.getItem(key) || '0', 10);
     if (count < 3) {
       setShowEditTip(true);

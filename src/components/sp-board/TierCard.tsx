@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { X, Merge, Check, Split, Info, TrendingUp } from 'lucide-react';
-import { KspItem } from '@/types';
+import { SpItem } from '@/types';
 import { useTranslation } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +51,7 @@ function getDisplayName(featureName: string, locale: string): string {
 }
 
 interface TierCardProps {
-  item: KspItem;
+  item: SpItem;
   isDragging?: boolean;
   compact?: boolean;
   onDelete?: (id: string) => void;

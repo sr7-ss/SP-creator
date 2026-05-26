@@ -79,13 +79,13 @@ function extractArray(parsed: unknown): unknown[] {
 // ─── Main Shared Function ───────────────────────────────────────
 
 export interface RunPackagingParams {
-  kspItems: Array<{ tier: number; featureName: string; paramValue: string }>;
+  spItems: Array<{ tier: number; featureName: string; paramValue: string }>;
   productName: string;
   segment: string;
   competitorContext: string;
   positioning?: { targetAudience?: string; productStyle?: string[]; positioning?: string; referencePackaging?: string };
   researchContext?: string;
-  /** Strategy key from PACKAGING_STRATEGIES (e.g. "value-for-money"). Determines slogan type per KSP. */
+  /** Strategy key from PACKAGING_STRATEGIES (e.g. "value-for-money"). Determines slogan type per SP. */
   packagingStrategy?: string;
   locale: string;
   userId: string;
@@ -111,7 +111,7 @@ export type RunPackagingResult =
 
 export async function runPackaging(params: RunPackagingParams): Promise<RunPackagingResult> {
   const {
-    kspItems, productName, segment, competitorContext, positioning, researchContext,
+    spItems, productName, segment, competitorContext, positioning, researchContext,
     packagingStrategy,
     locale, userId, provider: aiProvider, apiKey, model,
     deductCredit = false, logAction = 'ai_packaging',
@@ -119,8 +119,8 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
   } = params;
   const zh = locale === 'zh';
 
-  if (!kspItems || kspItems.length === 0) {
-    return { error: zh ? '请先生成卖点分级' : 'KSP items are required.', status: 400 };
+  if (!spItems || spItems.length === 0) {
+    return { error: zh ? '请先生成卖点分级' : 'SP items are required.', status: 400 };
   }
 
   if (!apiKey) {
@@ -136,7 +136,7 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
   }
 
   // ── Knowledge base: query all types ──
-  const inputParams = kspItems.map(i => i.featureName.toLowerCase());
+  const inputParams = spItems.map(i => i.featureName.toLowerCase());
   const isRelevant = (feature: string) => {
     const f = feature.toLowerCase();
     return inputParams.some(ip => ip.includes(f) || f.includes(ip));
@@ -184,14 +184,14 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
   // Compute per-row slogan hint based on the active packaging strategy.
   // Result is appended to each <待包装> line so the model follows orders
   // instead of inferring slogan type from rule tables.
-  const itemsWithHints = kspItems.map(item => ({
+  const itemsWithHints = spItems.map(item => ({
     ...item,
     sloganHint: formatSloganHint(decideSloganTypeForKsp(packagingStrategy, item.tier)),
   }));
 
   const buildUserPromptForItems = (items: typeof itemsWithHints): string => {
     return getPackagingUserPrompt({
-      kspItems: items,
+      spItems: items,
       productName,
       segment,
       positioning: positioning ? {
@@ -244,7 +244,7 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
   const BATCH_SIZE = 5;
   let normalized: NormalizedPackaging[] = [];
 
-  const shouldBatch = !refinementPrompt && kspItems.length >= BATCH_THRESHOLD;
+  const shouldBatch = !refinementPrompt && spItems.length >= BATCH_THRESHOLD;
   let needBatch = shouldBatch;
 
   if (!shouldBatch) {
@@ -273,11 +273,11 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
   }
 
   // ── Retry for missing items ──
-  const missingIndices = kspItems
+  const missingIndices = spItems
     .map((_, idx) => idx)
     .filter(idx => !normalized[idx] || !normalized[idx].l1Name);
 
-  if (missingIndices.length > 0 && missingIndices.length < kspItems.length) {
+  if (missingIndices.length > 0 && missingIndices.length < spItems.length) {
     try {
       const missingItems = missingIndices.map(i => itemsWithHints[i]);
       const retryPrompt = `Generate packaging for these ${missingItems.length} items ONLY:\n` +
@@ -304,7 +304,7 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
       retryResults.forEach((pkg, retryIdx) => {
         const originalIdx = missingIndices[retryIdx];
         if (originalIdx !== undefined) {
-          normalized[originalIdx] = normalizePkg(pkg, kspItems[originalIdx]);
+          normalized[originalIdx] = normalizePkg(pkg, spItems[originalIdx]);
         }
       });
     } catch (retryErr) {

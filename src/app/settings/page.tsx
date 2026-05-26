@@ -24,7 +24,7 @@ const providerKeys = Object.keys(AI_PROVIDER_META) as AIProvider[];
 const ACTION_LABELS: Record<string, { en: string; zh: string }> = {
   ai_parse_params: { en: 'Param Recognition', zh: '参数识别' },
   ai_analyze: { en: 'Competitive Analysis', zh: '竞品分析' },
-  ai_ksp_tier: { en: 'KSP Grading', zh: '卖点分级' },
+  ai_ksp_tier: { en: 'SP Grading', zh: '卖点分级' },
   ai_packaging: { en: 'Selling Point Packaging', zh: '卖点包装' },
   ai_agent_orchestration: { en: 'Agent Orchestration', zh: 'Agent 编排' },
   ai_agent_packaging: { en: 'Agent Packaging', zh: 'Agent 包装' },
@@ -474,8 +474,8 @@ function PrivacySection({
             </div>
             <div className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
               {zh
-                ? '开启后，上传的文件、KSP 结果、知识库条目仅存于你的浏览器；AI 调用走你的 API Key 直连模型供应商，不经我们服务器。'
-                : 'When on, uploads, KSP results, and knowledge entries stay in your browser; AI calls go direct to providers using your own API key, bypassing our server.'}
+                ? '开启后，上传的文件、SP 结果、知识库条目仅存于你的浏览器；AI 调用走你的 API Key 直连模型供应商，不经我们服务器。'
+                : 'When on, uploads, SP results, and knowledge entries stay in your browser; AI calls go direct to providers using your own API key, bypassing our server.'}
             </div>
           </div>
         </div>
@@ -489,7 +489,7 @@ function PrivacySection({
             <DataFlowRow
               icon={HardDrive}
               iconColor="text-emerald-600"
-              label={zh ? '上传文件 / 知识库 / KSP' : 'Uploads / knowledge / KSP'}
+              label={zh ? '上传文件 / 知识库 / SP' : 'Uploads / knowledge / SP'}
               destination={zh ? '你的浏览器（IndexedDB）' : 'Your browser (IndexedDB)'}
               status={privacyMode ? 'active' : 'pending'}
               statusText={privacyMode ? (zh ? '本地' : 'Local') : (zh ? '即将本地化' : 'Going local soon')}

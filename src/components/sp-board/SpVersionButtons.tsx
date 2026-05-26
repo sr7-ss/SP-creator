@@ -4,35 +4,35 @@ import { useState, useCallback } from 'react';
 import { Save, History, ChevronDown, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { KspItem } from '@/types';
+import { SpItem } from '@/types';
 
-interface KspVersionMeta {
+interface SpVersionMeta {
   id: string;
   name: string;
   createdAt: string;
 }
 
-interface KspVersionButtonsProps {
+interface SpVersionButtonsProps {
   projectId: string;
-  items: KspItem[];
-  onLoadVersion: (items: KspItem[]) => void;
+  items: SpItem[];
+  onLoadVersion: (items: SpItem[]) => void;
   locale: string;
 }
 
-export default function KspVersionButtons({ projectId, items, onLoadVersion, locale }: KspVersionButtonsProps) {
+export default function SpVersionButtons({ projectId, items, onLoadVersion, locale }: SpVersionButtonsProps) {
   const zh = locale === 'zh';
 
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [versionName, setVersionName] = useState('');
   const [savingVersion, setSavingVersion] = useState(false);
-  const [versions, setVersions] = useState<KspVersionMeta[]>([]);
+  const [versions, setVersions] = useState<SpVersionMeta[]>([]);
   const [showVersions, setShowVersions] = useState(false);
   const [loadingVersions, setLoadingVersions] = useState(false);
 
   const fetchVersions = useCallback(async () => {
     setLoadingVersions(true);
     try {
-      const res = await fetch(`/api/projects/${projectId}/ksp-versions`);
+      const res = await fetch(`/api/projects/${projectId}/sp-versions`);
       if (res.ok) {
         const data = await res.json();
         setVersions(data.versions || []);
@@ -45,10 +45,10 @@ export default function KspVersionButtons({ projectId, items, onLoadVersion, loc
     if (!versionName.trim()) return;
     setSavingVersion(true);
     try {
-      const res = await fetch(`/api/projects/${projectId}/ksp-versions`, {
+      const res = await fetch(`/api/projects/${projectId}/sp-versions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: versionName.trim(), kspItems: items }),
+        body: JSON.stringify({ name: versionName.trim(), spItems: items }),
       });
       if (res.ok) {
         setShowSaveDialog(false);
@@ -61,10 +61,10 @@ export default function KspVersionButtons({ projectId, items, onLoadVersion, loc
 
   const handleLoadVersion = useCallback(async (versionId: string) => {
     try {
-      const res = await fetch(`/api/projects/${projectId}/ksp-versions/${versionId}`);
+      const res = await fetch(`/api/projects/${projectId}/sp-versions/${versionId}`);
       if (res.ok) {
         const data = await res.json();
-        const snapshot = data.version?.snapshot as KspItem[] | undefined;
+        const snapshot = data.version?.snapshot as SpItem[] | undefined;
         if (snapshot && Array.isArray(snapshot)) {
           onLoadVersion(snapshot);
           setShowVersions(false);
@@ -75,7 +75,7 @@ export default function KspVersionButtons({ projectId, items, onLoadVersion, loc
 
   const handleDeleteVersion = useCallback(async (versionId: string) => {
     try {
-      await fetch(`/api/projects/${projectId}/ksp-versions/${versionId}`, { method: 'DELETE' });
+      await fetch(`/api/projects/${projectId}/sp-versions/${versionId}`, { method: 'DELETE' });
       fetchVersions();
     } catch { /* ignore */ }
   }, [projectId, fetchVersions]);

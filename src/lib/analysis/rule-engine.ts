@@ -1,7 +1,7 @@
 /**
- * Rule-based competitive analysis and KSP tiering.
+ * Rule-based competitive analysis and SP tiering.
  * Replaces two AI calls with deterministic logic.
- * Output format is fully compatible with the existing CompetitiveAnalysis and KspItem types.
+ * Output format is fully compatible with the existing CompetitiveAnalysis and SpItem types.
  */
 
 import { CompetitiveAnalysis, AnalysisItem } from '@/types';
@@ -143,9 +143,9 @@ export function compareParams(
   return { advantages, disadvantages, neutral };
 }
 
-// ─── Step 2: KSP Tier Assignment ────────────────────────────────
+// ─── Step 2: SP Tier Assignment ────────────────────────────────
 
-interface KspItemResult {
+interface SpItemResult {
   tier: 0 | 1 | 2 | 3;
   featureName: string;
   paramValue: string;
@@ -193,7 +193,7 @@ function getAttentionScore(feature: string, paramKey?: string): number {
 /**
  * Assign T1/T2/T3 tiers based on analysis results using scoring matrix.
  */
-export function assignTiers(analysis: CompetitiveAnalysis): KspItemResult[] {
+export function assignTiers(analysis: CompetitiveAnalysis): SpItemResult[] {
   // Collect all items with their scores
   const candidates = [
     ...analysis.advantages,
@@ -228,7 +228,7 @@ export function assignTiers(analysis: CompetitiveAnalysis): KspItemResult[] {
 
   // Assign tiers
   // Hard rule: T1 candidates MUST be slight_lead or strong_lead — neutral/lag can never be T1
-  const results: KspItemResult[] = [];
+  const results: SpItemResult[] = [];
   let t1Count = 0;
   const t1Max = 3;
 
@@ -291,14 +291,14 @@ export function assignTiers(analysis: CompetitiveAnalysis): KspItemResult[] {
 
 /**
  * Full rule-based pipeline: analyze + tier.
- * Drop-in replacement for the AI analyze-ksp-tier endpoint.
+ * Drop-in replacement for the AI analyze-sp-tier endpoint.
  */
 export function analyzeAndTier(
   own: ProductInput,
   competitors: ProductInput[],
   locale: string = 'zh'
-): { analysis: CompetitiveAnalysis; kspItems: KspItemResult[] } {
+): { analysis: CompetitiveAnalysis; spItems: SpItemResult[] } {
   const analysis = compareParams(own, competitors, locale);
-  const kspItems = assignTiers(analysis);
-  return { analysis, kspItems };
+  const spItems = assignTiers(analysis);
+  return { analysis, spItems };
 }

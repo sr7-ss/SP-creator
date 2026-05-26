@@ -33,7 +33,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     'reviews.fileLoaded': '{count} reviews loaded from {file}',
 
     // Home
-    'home.title': 'Welcome to KSP Packaging Assistant',
+    'home.title': 'Welcome to SP Packaging Assistant',
     'home.subtitle': 'Quickly create compelling selling points for your products',
     'home.newProject': 'Create your first project \u2192',
     'home.recentProjects': 'Recent Projects',
@@ -75,9 +75,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     'compare.disadvantages': 'Disadvantages',
     'compare.neutral': 'Neutral',
 
-    // KSP
-    'ksp.title': 'KSP Tiering',
-    'ksp.generate': 'AI Generate KSP',
+    // SP
+    'ksp.title': 'SP Tiering',
+    'ksp.generate': 'AI Generate SP',
     'ksp.generating': 'Generating...',
     'ksp.tier1': 'Tier 1 - Core',
     'ksp.tier2': 'Tier 2 - Important',
@@ -118,7 +118,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     'settings.taskLight': 'Light Tasks',
     'settings.taskLightDesc': 'Param recognition, Agent orchestration',
     'settings.taskAnalysis': 'Analysis',
-    'settings.taskAnalysisDesc': 'Competitive analysis, KSP grading',
+    'settings.taskAnalysisDesc': 'Competitive analysis, SP grading',
     'settings.taskResearch': 'Deep Research',
     'settings.taskResearchDesc': 'Market research, review crawling (multi-turn Agent, high token usage)',
     'settings.taskCreative': 'Creative Output',
@@ -210,9 +210,9 @@ export const translations: Record<Locale, Record<string, string>> = {
     'compare.disadvantages': '劣势',
     'compare.neutral': '持平',
 
-    // KSP
+    // SP
     'ksp.title': '卖点分级',
-    'ksp.generate': 'AI 生成 KSP',
+    'ksp.generate': 'AI 生成 SP',
     'ksp.generating': '生成中...',
     'ksp.tier1': 'T1 - 核心卖点',
     'ksp.tier2': 'T2 - 重要卖点',

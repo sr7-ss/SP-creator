@@ -1,13 +1,13 @@
 /**
  * Review Mining Agent: analyzes product reviews, identifies themes,
  * deep-dives into problem areas, cross-references with competitor specs,
- * and suggests KSP tier adjustments.
+ * and suggests SP tier adjustments.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { ReviewDimension, DIMENSION_LABELS } from '@/lib/ai/prompts/review-analysis';
 import { mapRawToParams, parseGSMArenaHtml, parse91mobilesHtml, parseCellKaroHtml, parseTechSpecsHtml } from '@/lib/analysis/spec-scraper';
-import type { KspItem, ReviewInsight, KspAdjustmentSuggestion } from '@/types';
+import type { SpItem, ReviewInsight, SpAdjustmentSuggestion } from '@/types';
 
 // ─── Types matching the generic agent-runner interface ─────────────
 
@@ -259,11 +259,11 @@ const crossReferenceSpecsTool: AgentToolDef = {
   },
 };
 
-const suggestKspAdjustmentsTool: AgentToolDef = {
+const suggestSpAdjustmentsTool: AgentToolDef = {
   definition: {
     name: 'suggest_ksp_adjustments',
     description:
-      'Based on review insights, suggest which features should move up/down in KSP tiers, or new features to add.',
+      'Based on review insights, suggest which features should move up/down in SP tiers, or new features to add.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -281,7 +281,7 @@ const suggestKspAdjustmentsTool: AgentToolDef = {
           },
           description: 'Review insights from deep-dive analysis',
         },
-        currentKspItems: {
+        currentSpItems: {
           type: 'array',
           items: {
             type: 'object',
@@ -292,29 +292,29 @@ const suggestKspAdjustmentsTool: AgentToolDef = {
               paramValue: { type: 'string' },
             },
           },
-          description: 'Current KSP items from the project (optional)',
+          description: 'Current SP items from the project (optional)',
         },
       },
       required: ['insights'],
     },
   },
   handler: async (input: unknown, context: AgentContext): Promise<string> => {
-    const { insights, currentKspItems } = input as {
+    const { insights, currentSpItems } = input as {
       insights: ReviewInsight[];
-      currentKspItems?: KspItem[];
+      currentSpItems?: SpItem[];
     };
     const zh = context.locale === 'zh';
 
     context.onProgress({
       step: 'ksp_suggestions',
-      detail: zh ? '正在生成 KSP 调整建议...' : 'Generating KSP adjustment suggestions...',
+      detail: zh ? '正在生成 SP 调整建议...' : 'Generating SP adjustment suggestions...',
       progress: 0.85,
     });
 
     return JSON.stringify({
       insights,
-      currentKspItems: currentKspItems || [],
-      instruction: `Based on these review insights, suggest KSP tier adjustments. For each suggestion, provide: featureName, suggestedTier (1/2/3), direction (promote/demote/add/keep), reason, confidence (0-1). Return JSON array of suggestions.`,
+      currentSpItems: currentSpItems || [],
+      instruction: `Based on these review insights, suggest SP tier adjustments. For each suggestion, provide: featureName, suggestedTier (1/2/3), direction (promote/demote/add/keep), reason, confidence (0-1). Return JSON array of suggestions.`,
     });
   },
 };
@@ -400,7 +400,7 @@ export function getReviewMiningAgentConfig(locale: string): AgentRunnerConfig {
 2. 识别前 3 个最有影响力的主题/维度
 3. 对每个重要主题使用 deep_dive_theme 深入分析，找出根因
 4. 如果提供了产品名称，使用 cross_reference_specs 交叉对比参数规格
-5. 最后使用 suggest_ksp_adjustments 生成 KSP 卖点调整建议
+5. 最后使用 suggest_ksp_adjustments 生成 SP 卖点调整建议
 
 可用维度：${dimensionList}
 
@@ -408,7 +408,7 @@ export function getReviewMiningAgentConfig(locale: string): AgentRunnerConfig {
 - 分析要全面但输出简洁
 - 对每条评论都要有准确的情感判断
 - 深入分析要找出真正的问题根因
-- KSP 建议要具体、可执行
+- SP 建议要具体、可执行
 - 用中文回复`
     : `You are a review mining agent for product competitive analysis. Analyze customer reviews to extract actionable insights.
 
@@ -417,7 +417,7 @@ Workflow:
 2. Identify the top 3 most impactful themes/dimensions
 3. For each major theme, use deep_dive_theme to understand root causes
 4. If a product name is provided, use cross_reference_specs to verify insights against actual specs
-5. Finally, use suggest_ksp_adjustments to generate KSP tier adjustment suggestions
+5. Finally, use suggest_ksp_adjustments to generate SP tier adjustment suggestions
 
 Available dimensions: ${dimensionList}
 
@@ -425,7 +425,7 @@ Requirements:
 - Be thorough in analysis but concise in output
 - Accurately classify sentiment for every review
 - Deep-dives should uncover genuine root causes
-- KSP suggestions should be specific and actionable
+- SP suggestions should be specific and actionable
 - Respond in English`;
 
   return {
@@ -434,7 +434,7 @@ Requirements:
       analyzeReviewsTool,
       deepDiveThemeTool,
       crossReferenceSpecsTool,
-      suggestKspAdjustmentsTool,
+      suggestSpAdjustmentsTool,
     ],
     maxIterations: 15,
     agentName: 'reviews',

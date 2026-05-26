@@ -75,7 +75,7 @@ function pickKeyParams(params: Record<string, string>): Array<{ key: string; lab
 
 function loadSavedInputs(projectId: string): { category: string; priceRange: string } {
   try {
-    const raw = localStorage.getItem(`ksp-discovery-${projectId}`);
+    const raw = localStorage.getItem(`sp-discovery-${projectId}`);
     if (raw) {
       const parsed = JSON.parse(raw);
       return {
@@ -90,7 +90,7 @@ function loadSavedInputs(projectId: string): { category: string; priceRange: str
 function saveInputs(projectId: string, category: string, priceRange: string) {
   try {
     localStorage.setItem(
-      `ksp-discovery-${projectId}`,
+      `sp-discovery-${projectId}`,
       JSON.stringify({ category, priceRange })
     );
   } catch { /* ignore */ }

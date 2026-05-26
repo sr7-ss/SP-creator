@@ -13,15 +13,15 @@ import { useTranslation, useAppContext } from '@/lib/store';
 import ParamTable from '@/components/param-table/ParamTable';
 import SmartPaste from '@/components/param-table/SmartPaste';
 import TextParseDialog from '@/components/param-table/TextParseDialog';
-import TierBoard from '@/components/ksp-board/TierBoard';
-import KspVersionButtons from '@/components/ksp-board/KspVersionButtons';
+import TierBoard from '@/components/sp-board/TierBoard';
+import SpVersionButtons from '@/components/sp-board/SpVersionButtons';
 import PackagingView from '@/components/packaging/PackagingView';
 import PromptPreviewPanel from '@/components/packaging/PromptPreviewPanel';
 import PackagingDetailView from '@/components/packaging/PackagingDetailView';
 import PositioningDialog, { ProductPositioning } from '@/components/packaging/PositioningDialog';
 import ResearchContextPicker from '@/components/packaging/ResearchContextPicker';
 import ModelSelector from '@/components/ModelSelector';
-import { KspItem, CompetitiveAnalysis, ResearchReport } from '@/types';
+import { SpItem, CompetitiveAnalysis, ResearchReport } from '@/types';
 import { loadSettings, getConfigForTask, AppSettings } from '@/lib/settings';
 import { migrateOldParams } from '@/lib/analysis/migrate-params';
 import { SOFT_SELLING_POINTS } from '@/lib/constants/soft-selling-points';
@@ -44,7 +44,7 @@ interface ProductData {
   sortOrder: number;
 }
 
-interface KspResultData {
+interface SpResultData {
   id: string;
   tier: number;
   featureName: string;
@@ -75,7 +75,7 @@ interface ProjectData {
   positioning?: string | null;
   packagingStrategy?: string | null;
   products: ProductData[];
-  kspResults: KspResultData[];
+  spResults: SpResultData[];
   analyses?: AnalysisData[];
 }
 
@@ -196,7 +196,7 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params.id as string;
 
-  const cacheKey = `ksp-project-cache-${projectId}`;
+  const cacheKey = `sp-project-cache-${projectId}`;
 
   const [project, setProjectRaw] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -224,27 +224,27 @@ export default function ProjectDetailPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  // KSP state
-  const [kspItems, setKspItems] = useState<KspItem[]>([]);
-  const [unrankedItems, setUnrankedItems] = useState<KspItem[]>([]);
-  const kspLoadedFromDbRef = useRef(false);
+  // SP state
+  const [spItems, setSpItems] = useState<SpItem[]>([]);
+  const [unrankedItems, setUnrankedItems] = useState<SpItem[]>([]);
+  const spLoadedFromDbRef = useRef(false);
   const hasDbResultsRef = useRef(false);
 
-  // Cache analysis + KSP to localStorage for offline resilience
+  // Cache analysis + SP to localStorage for offline resilience
   useEffect(() => {
     if (analysis) {
       try { localStorage.setItem(`${cacheKey}-analysis`, JSON.stringify(analysis)); } catch {}
     }
   }, [analysis, cacheKey]);
   useEffect(() => {
-    if (kspItems.length > 0) {
-      try { localStorage.setItem(`${cacheKey}-ksp`, JSON.stringify(kspItems)); } catch {}
+    if (spItems.length > 0) {
+      try { localStorage.setItem(`${cacheKey}-ksp`, JSON.stringify(spItems)); } catch {}
     }
-  }, [kspItems, cacheKey]);
+  }, [spItems, cacheKey]);
 
   // Export refs for each tab
   const compareExportRef = useRef<HTMLDivElement>(null);
-  const kspExportRef = useRef<HTMLDivElement>(null);
+  const spExportRef = useRef<HTMLDivElement>(null);
   const packagingExportRef = useRef<HTMLDivElement>(null);
 
   // Snapshots of fresh AI-generated packaging keyed by item id.
@@ -253,16 +253,16 @@ export default function ProjectDetailPage() {
   // Each entry is fired at most once via track('ai_output_edited').
   const aiSnapshotRef = useRef<Record<string, { l1Name: string; l2Slogan: string; l3DetailsJson: string }>>({});
 
-  // Auto-save KSP items to DB when user reorders / edits
-  const kspSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Auto-save SP items to DB when user reorders / edits
+  const spSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     // Don't save during initial load or if nothing loaded yet
-    if (!kspLoadedFromDbRef.current) return;
-    if (kspItems.length === 0) return;
+    if (!spLoadedFromDbRef.current) return;
+    if (spItems.length === 0) return;
 
     // For every item with an AI snapshot, check if the user has edited any
     // field. If so, fire one ai_output_edited event and drop the snapshot.
-    for (const item of kspItems) {
+    for (const item of spItems) {
       const snap = aiSnapshotRef.current[item.id];
       if (!snap) continue;
       const curL3 = JSON.stringify(item.l3Details || []);
@@ -281,14 +281,14 @@ export default function ProjectDetailPage() {
       }
     }
 
-    if (kspSaveTimeoutRef.current) clearTimeout(kspSaveTimeoutRef.current);
-    kspSaveTimeoutRef.current = setTimeout(async () => {
+    if (spSaveTimeoutRef.current) clearTimeout(spSaveTimeoutRef.current);
+    spSaveTimeoutRef.current = setTimeout(async () => {
       try {
-        await fetch(`/api/projects/${projectId}/ksp-results`, {
+        await fetch(`/api/projects/${projectId}/sp-results`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            items: kspItems.map((item, idx) => ({
+            items: spItems.map((item, idx) => ({
               tier: item.tier,
               featureName: item.featureName,
               paramValue: item.paramValue || '',
@@ -303,14 +303,14 @@ export default function ProjectDetailPage() {
           }),
         });
       } catch (err) {
-        console.error('Failed to auto-save KSP items:', err);
+        console.error('Failed to auto-save SP items:', err);
       }
     }, 1000);
 
     return () => {
-      if (kspSaveTimeoutRef.current) clearTimeout(kspSaveTimeoutRef.current);
+      if (spSaveTimeoutRef.current) clearTimeout(spSaveTimeoutRef.current);
     };
-  }, [kspItems, projectId]);
+  }, [spItems, projectId]);
 
   // Packaging state
   const [isGeneratingPackaging, setIsGeneratingPackaging] = useState(false);
@@ -319,16 +319,16 @@ export default function ProjectDetailPage() {
   const [showResearchPicker, setShowResearchPicker] = useState(false);
   const [researchContext, setResearchContext] = useState<string>('');
   const [regeneratingItemId, setRegeneratingItemId] = useState<string | null>(null);
-  const [selectedPackagingItem, setSelectedPackagingItem] = useState<KspItem | null>(null);
+  const [selectedPackagingItem, setSelectedPackagingItem] = useState<SpItem | null>(null);
   const [researchReport, setResearchReport] = useState<ResearchReport | null>(null);
 
-  // Keep selected packaging item in sync with kspItems
+  // Keep selected packaging item in sync with spItems
   useEffect(() => {
     if (selectedPackagingItem) {
-      const updated = kspItems.find(i => i.id === selectedPackagingItem.id);
+      const updated = spItems.find(i => i.id === selectedPackagingItem.id);
       if (updated) setSelectedPackagingItem(updated);
     }
-  }, [kspItems]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [spItems]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-load latest saved research report for this project
   useEffect(() => {
@@ -344,7 +344,7 @@ export default function ProjectDetailPage() {
             topPros: latest.insights?.filter?.((i: Record<string, string>) => i.sentiment === 'positive') || latest.topPros || [],
             topCons: latest.insights?.filter?.((i: Record<string, string>) => i.sentiment === 'negative') || latest.topCons || [],
             competitorMessaging: latest.messaging || [],
-            kspRecommendations: latest.recommendations || [],
+            spRecommendations: latest.recommendations || [],
             sources: latest.sources || [],
           });
         }
@@ -352,21 +352,21 @@ export default function ProjectDetailPage() {
       .catch(() => {});
   }, [projectId]);
 
-  // Delete a KSP item
-  const handleDeleteKspItem = useCallback((itemId: string) => {
-    setKspItems(prev => prev.filter(item => item.id !== itemId));
+  // Delete a SP item
+  const handleDeleteSpItem = useCallback((itemId: string) => {
+    setSpItems(prev => prev.filter(item => item.id !== itemId));
   }, []);
 
-  // Update a single KSP item (inline edit from PackagingView)
-  const handleItemUpdate = useCallback((itemId: string, updates: Partial<KspItem>) => {
-    setKspItems(prev => prev.map(item =>
+  // Update a single SP item (inline edit from PackagingView)
+  const handleItemUpdate = useCallback((itemId: string, updates: Partial<SpItem>) => {
+    setSpItems(prev => prev.map(item =>
       item.id === itemId ? { ...item, ...updates } : item
     ));
   }, []);
 
   // Regenerate packaging for a single item
   const handleSingleRegenerate = useCallback(async (itemId: string) => {
-    const item = kspItems.find(i => i.id === itemId);
+    const item = spItems.find(i => i.id === itemId);
     if (!item || !project) return;
 
     const config = getConfigForTask(aiSettings, 'packaging');
@@ -381,7 +381,7 @@ export default function ProjectDetailPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kspItems: [{ tier: item.tier, featureName: item.featureName, paramValue: item.paramValue }],
+          spItems: [{ tier: item.tier, featureName: item.featureName, paramValue: item.paramValue }],
           productName: project.products.find(p => p.isOwnProduct)?.name || project.name,
           segment: project.segment,
           locale,
@@ -407,7 +407,7 @@ export default function ProjectDetailPage() {
           l2Slogan: newL2,
           l3DetailsJson: JSON.stringify(newL3),
         };
-        setKspItems(prev => prev.map(i =>
+        setSpItems(prev => prev.map(i =>
           i.id === itemId ? {
             ...i,
             l1Name: newL1,
@@ -428,11 +428,11 @@ export default function ProjectDetailPage() {
     } finally {
       setRegeneratingItemId(null);
     }
-  }, [kspItems, project, locale, aiSettings]);
+  }, [spItems, project, locale, aiSettings]);
 
   // Refine packaging for a single item with user's instruction
   const handleRefine = useCallback(async (itemId: string, refinementPrompt: string) => {
-    const item = kspItems.find(i => i.id === itemId);
+    const item = spItems.find(i => i.id === itemId);
     if (!item || !project) return;
 
     const config = getConfigForTask(aiSettings, 'packaging');
@@ -453,7 +453,7 @@ export default function ProjectDetailPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        kspItems: [{ tier: item.tier, featureName: item.featureName, paramValue: item.paramValue }],
+        spItems: [{ tier: item.tier, featureName: item.featureName, paramValue: item.paramValue }],
         productName: project.products.find(p => p.isOwnProduct)?.name || project.name,
         segment: project.segment,
         locale,
@@ -493,7 +493,7 @@ export default function ProjectDetailPage() {
         createdAt: new Date().toISOString(),
       };
 
-      setKspItems(prev => prev.map(i =>
+      setSpItems(prev => prev.map(i =>
         i.id === itemId ? {
           ...i,
           l1Name: newVersion.l1Name,
@@ -506,7 +506,7 @@ export default function ProjectDetailPage() {
       ));
       toast.success(locale === 'zh' ? '微调完成，已生成新版本' : 'Refinement done, new version generated');
     }
-  }, [kspItems, project, locale, aiSettings]);
+  }, [spItems, project, locale, aiSettings]);
 
   // Handle parsed products from SmartPaste / TextParseDialog.
   // Updates state directly (no page reload) so data is never lost.
@@ -605,16 +605,16 @@ export default function ProjectDetailPage() {
       }
     }
 
-    // Restore KSP items from DB
-    if (data.kspResults && data.kspResults.length > 0) {
-      const restored: KspItem[] = data.kspResults.map(
-        (r: KspResultData, idx: number) => ({
-          id: r.id || `ksp-db-${idx}`,
+    // Restore SP items from DB
+    if (data.spResults && data.spResults.length > 0) {
+      const restored: SpItem[] = data.spResults.map(
+        (r: SpResultData, idx: number) => ({
+          id: r.id || `sp-db-${idx}`,
           tier: r.tier as 0 | 1 | 2 | 3,
           featureName: r.featureName,
           paramValue: r.paramValue || '',
           leadLevel: (['strong_lead', 'slight_lead', 'neutral', 'slight_lag', 'strong_lag'].includes(r.leadLevel || '')
-            ? r.leadLevel as KspItem['leadLevel']
+            ? r.leadLevel as SpItem['leadLevel']
             : undefined),
           l1Name: r.l1Name || undefined,
           l2Slogan: r.l2Slogan || undefined,
@@ -653,17 +653,17 @@ export default function ProjectDetailPage() {
       }
 
       filtered.sort((a, b) => a.tier - b.tier || a.sortOrder - b.sortOrder);
-      setKspItems(filtered);
+      setSpItems(filtered);
     }
 
     // Mark as loaded so auto-save can start tracking changes
-    kspLoadedFromDbRef.current = true;
+    spLoadedFromDbRef.current = true;
 
-    // If DB had analysis OR KSP, suppress auto-generation.
-    // This prevents agent results (which always have KSP) from being wiped
+    // If DB had analysis OR SP, suppress auto-generation.
+    // This prevents agent results (which always have SP) from being wiped
     // by auto-analysis even if analysis is temporarily missing.
     const hasAnalysis = data.analyses && data.analyses.length > 0;
-    const hasKsp = data.kspResults && data.kspResults.length > 0;
+    const hasKsp = data.spResults && data.spResults.length > 0;
     if (hasAnalysis || hasKsp) {
       hasDbResultsRef.current = true;
     }
@@ -710,23 +710,23 @@ export default function ProjectDetailPage() {
 
         loadProjectData(useData);
 
-        // Restore analysis/KSP from cache if DB has none
+        // Restore analysis/SP from cache if DB has none
         try {
           if ((!useData.analyses || useData.analyses.length === 0)) {
             const cachedAnalysis = localStorage.getItem(`${cacheKey}-analysis`);
             if (cachedAnalysis) setAnalysis(JSON.parse(cachedAnalysis));
           }
-          if ((!useData.kspResults || useData.kspResults.length === 0)) {
+          if ((!useData.spResults || useData.spResults.length === 0)) {
             const cachedKsp = localStorage.getItem(`${cacheKey}-ksp`);
             if (cachedKsp) {
               const items = JSON.parse(cachedKsp);
-              setKspItems(items);
-              kspLoadedFromDbRef.current = true;
-              // Re-save KSP to DB
-              fetch(`/api/projects/${projectId}/ksp-results`, {
+              setSpItems(items);
+              spLoadedFromDbRef.current = true;
+              // Re-save SP to DB
+              fetch(`/api/projects/${projectId}/sp-results`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items: items.map((item: KspItem, idx: number) => ({
+                body: JSON.stringify({ items: items.map((item: SpItem, idx: number) => ({
                   tier: item.tier, featureName: item.featureName,
                   paramValue: item.paramValue, leadLevel: item.leadLevel,
                   sortOrder: idx,
@@ -750,8 +750,8 @@ export default function ProjectDetailPage() {
           if (cachedAnalysis) setAnalysis(JSON.parse(cachedAnalysis));
           const cachedKsp = localStorage.getItem(`${cacheKey}-ksp`);
           if (cachedKsp) {
-            setKspItems(JSON.parse(cachedKsp));
-            kspLoadedFromDbRef.current = true;
+            setSpItems(JSON.parse(cachedKsp));
+            spLoadedFromDbRef.current = true;
           }
         } catch {}
         setLoading(false);
@@ -839,7 +839,7 @@ export default function ProjectDetailPage() {
     return () => setHeaderLeft(null);
   }, [project, setHeaderLeft]);
 
-  // Run rule-based analysis + KSP tiering (no AI needed).
+  // Run rule-based analysis + SP tiering (no AI needed).
   const runAnalysisAndKsp = useCallback(
     async (runHash: string) => {
       if (!project) return;
@@ -860,7 +860,7 @@ export default function ProjectDetailPage() {
       setAnalysisError(null);
 
       try {
-        const res = await fetch('/api/ai/analyze-ksp-tier', {
+        const res = await fetch('/api/ai/analyze-sp-tier', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -876,13 +876,13 @@ export default function ProjectDetailPage() {
 
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.error || 'Analysis+KSP generation failed');
+          throw new Error(data.error || 'Analysis+SP generation failed');
         }
 
         const result = await res.json();
         setAnalysis(result.analysis);
 
-        const itemsRaw: unknown[] = Array.isArray(result?.kspItems) ? result.kspItems : [];
+        const itemsRaw: unknown[] = Array.isArray(result?.spItems) ? result.spItems : [];
         const normalizeTier = (tier: unknown): 0 | 1 | 2 | 3 | undefined => {
           if (tier === 0 || tier === 1 || tier === 2 || tier === 3) return tier;
           if (typeof tier === 'number' && tier >= 0 && tier <= 3) {
@@ -897,8 +897,8 @@ export default function ProjectDetailPage() {
           return undefined;
         };
 
-        const items: KspItem[] = itemsRaw
-          .map((item, idx): KspItem | null => {
+        const items: SpItem[] = itemsRaw
+          .map((item, idx): SpItem | null => {
             const itemObj =
               item && typeof item === 'object' ? (item as Record<string, unknown>) : {};
             const tier = normalizeTier(itemObj['tier']);
@@ -911,22 +911,22 @@ export default function ProjectDetailPage() {
               itemObj['paramValue'] ?? itemObj['param_value'] ?? itemObj['value'] ?? ''
             ).trim();
             const reasoning = typeof itemObj['reasoning'] === 'string' ? itemObj['reasoning'] : undefined;
-            const leadLevel = typeof itemObj['leadLevel'] === 'string' ? itemObj['leadLevel'] as KspItem['leadLevel'] : undefined;
+            const leadLevel = typeof itemObj['leadLevel'] === 'string' ? itemObj['leadLevel'] as SpItem['leadLevel'] : undefined;
             return {
-              id: `ksp-${idx}`,
+              id: `sp-${idx}`,
               tier,
               featureName,
               paramValue,
               reasoning,
               leadLevel,
               sortOrder: idx,
-            } as KspItem;
+            } as SpItem;
           })
-          .filter((x): x is KspItem => x !== null);
+          .filter((x): x is SpItem => x !== null);
 
         items.sort((a, b) => a.tier - b.tier || a.sortOrder - b.sortOrder);
 
-        // Preserve existing packaging data (l1Name, l2Slogan, l3Details) from previous KSP items
+        // Preserve existing packaging data (l1Name, l2Slogan, l3Details) from previous SP items
         // so that re-running analysis doesn't wipe out already-generated packaging results.
         // Also merge by category keywords to handle "芯片" matching user's "MTK 7400 Ultra".
         const CATEGORY_KEYWORDS: Record<string, string[]> = {
@@ -948,11 +948,11 @@ export default function ProjectDetailPage() {
           return null;
         };
 
-        setKspItems((prev) => {
+        setSpItems((prev) => {
           if (prev.length === 0) return items;
           // Build lookup by exact name and by category
-          const prevByName = new Map<string, KspItem>();
-          const prevByCat = new Map<string, KspItem>();
+          const prevByName = new Map<string, SpItem>();
+          const prevByCat = new Map<string, SpItem>();
           for (const p of prev) {
             if (p.l1Name || p.l2Slogan) {
               prevByName.set(p.featureName.toLowerCase().trim(), p);
@@ -976,16 +976,16 @@ export default function ProjectDetailPage() {
             return item;
           });
         });
-        kspLoadedFromDbRef.current = true;
+        spLoadedFromDbRef.current = true;
 
-        lastAnalysisKspHashRef.current = runHash;
+        lastAnalysisSpHashRef.current = runHash;
       } catch (err) {
-        const rawMsg = err instanceof Error ? err.message : 'Analysis+KSP failed';
+        const rawMsg = err instanceof Error ? err.message : 'Analysis+SP failed';
         const friendly = friendlyError(rawMsg, locale);
         setAnalysisError(friendly);
         toast.error(friendly);
         // Mark hash so we don't retry infinitely on persistent errors
-        lastAnalysisKspHashRef.current = runHash;
+        lastAnalysisSpHashRef.current = runHash;
       } finally {
         setIsAnalyzing(false);
       }
@@ -1000,7 +1000,7 @@ export default function ProjectDetailPage() {
   }, []);
 
   const generatePackaging = useCallback(async (pos?: ProductPositioning | null) => {
-    if (kspItems.length === 0 || !project) return;
+    if (spItems.length === 0 || !project) return;
     const config = getConfigForTask(aiSettings, 'packaging');
     if (!config.apiKey) {
       toast.error(locale === 'zh' ? '请先在设置中配置 AI API Key' : 'Please configure AI API Key in Settings first');
@@ -1015,14 +1015,14 @@ export default function ProjectDetailPage() {
 
     setIsGeneratingPackaging(true);
     const packagingStart = Date.now();
-    const itemCount = kspItems.filter(i => i.tier >= 1 && i.tier <= 3).length;
+    const itemCount = spItems.filter(i => i.tier >= 1 && i.tier <= 3).length;
     track('ai_packaging_started', { itemCount, provider: config.provider });
     try {
       const res = await fetch('/api/ai/packaging', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          kspItems: [...kspItems]
+          spItems: [...spItems]
             .filter((i) => i.tier >= 1 && i.tier <= 3)  // Only send ranked items (exclude tier-0 soft selling points)
             .sort((a, b) => a.tier - b.tier || a.sortOrder - b.sortOrder)
             .map((i) => ({
@@ -1057,8 +1057,8 @@ export default function ProjectDetailPage() {
       const result = await res.json();
       track('ai_packaging_succeeded', { itemCount, durationMs: Date.now() - packagingStart, provider: config.provider });
 
-      // Merge packaging results into kspItems.
-      // The API now returns results in the same order as the input kspItems,
+      // Merge packaging results into spItems.
+      // The API now returns results in the same order as the input spItems,
       // so we match by index first, then fall back to featureName.
       const pkgResults: Array<Record<string, unknown>> = result.packagingResults || [];
 
@@ -1069,7 +1069,7 @@ export default function ProjectDetailPage() {
         if (pkg.featureName) pkgByName.set(normalize(String(pkg.featureName)), pkg);
       }
 
-      setKspItems((prev) => {
+      setSpItems((prev) => {
         // The packaging request only included tier 1-3 items, sorted by tier.
         // Reconstruct same order for index matching, then apply to all items.
         const rankedPrev = [...prev]
@@ -1119,14 +1119,14 @@ export default function ProjectDetailPage() {
     } finally {
       setIsGeneratingPackaging(false);
     }
-  }, [kspItems, project, analysis, locale, aiSettings]);
+  }, [spItems, project, analysis, locale, aiSettings]);
 
   // Active tab state
   const [activeTab, setActiveTab] = useState<'compare' | 'ksp' | 'packaging'>('compare');
 
   // Whether the user has entered meaningful parameter data for both
   // the "own product" and at least one competitor.
-  // Used to unlock KSP tab and trigger auto generation.
+  // Used to unlock SP tab and trigger auto generation.
   const hasParamData =
     !!project &&
     (() => {
@@ -1146,7 +1146,7 @@ export default function ProjectDetailPage() {
       return false;
     })();
 
-  const lastAnalysisKspHashRef = useRef<string>('');
+  const lastAnalysisSpHashRef = useRef<string>('');
   const inFlightRef = useRef(false);
 
   // Hash only product data + context — NOT the AI provider/model.
@@ -1169,7 +1169,7 @@ export default function ProjectDetailPage() {
     return JSON.stringify(payload);
   }, [project, projectId]);
 
-  // Auto run: analysis + KSP tiering should be tied to param comparison.
+  // Auto run: analysis + SP tiering should be tied to param comparison.
   useEffect(() => {
     if (!hasParamData) return;
     if (!paramsHash) return;
@@ -1178,12 +1178,12 @@ export default function ProjectDetailPage() {
     // until params actually change from user edits.
     if (hasDbResultsRef.current) {
       hasDbResultsRef.current = false;
-      lastAnalysisKspHashRef.current = paramsHash;
+      lastAnalysisSpHashRef.current = paramsHash;
       return;
     }
 
     // Don't rerun if hash hasn't changed
-    if (paramsHash === lastAnalysisKspHashRef.current) return;
+    if (paramsHash === lastAnalysisSpHashRef.current) return;
     if (isAnalyzing) return;
     if (inFlightRef.current) return;
 
@@ -1194,7 +1194,7 @@ export default function ProjectDetailPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasParamData, paramsHash, isAnalyzing]);
 
-  // Compute unranked params: own product params not already in kspItems
+  // Compute unranked params: own product params not already in spItems
   // All hooks must be ABOVE conditional returns to satisfy Rules of Hooks.
   const computedUnranked = useMemo(() => {
     if (!project) return [];
@@ -1202,7 +1202,7 @@ export default function ProjectDetailPage() {
     if (!ownProd) return [];
     let ownParams: Record<string, string>;
     try { ownParams = typeof ownProd.params === 'string' ? JSON.parse(ownProd.params) : ownProd.params as Record<string, string>; } catch { return []; }
-    if (kspItems.length === 0) return [];
+    if (spItems.length === 0) return [];
     if (unrankedItems.length > 0) return unrankedItems;
 
     // Build reverse lookup: display name / field key → category key
@@ -1225,9 +1225,9 @@ export default function ProjectDetailPage() {
       nameToCategory.set(names.zh, cat);
     }
 
-    // Determine which categories are already covered by KSP items
+    // Determine which categories are already covered by SP items
     const coveredCategories = new Set<string>();
-    for (const ksp of kspItems) {
+    for (const ksp of spItems) {
       const fn = ksp.featureName;
       // Try exact match on feature name
       const cat = nameToCategory.get(fn) || nameToCategory.get(fn.toLowerCase());
@@ -1262,7 +1262,7 @@ export default function ProjectDetailPage() {
           sortOrder: idx,
         };
       });
-  }, [project, kspItems, unrankedItems]);
+  }, [project, spItems, unrankedItems]);
 
   // Initialize unranked on first load
   const unrankedInitRef = useRef(false);
@@ -1304,15 +1304,15 @@ export default function ProjectDetailPage() {
       if (dis) parts.push(`Disadvantages: ${dis}`);
     }
 
-    if (kspItems.length > 0) {
-      const t1 = kspItems.filter(i => i.tier === 1).map(i => `${i.featureName}(${i.paramValue})`).join(', ');
-      const t2 = kspItems.filter(i => i.tier === 2).map(i => `${i.featureName}(${i.paramValue})`).join(', ');
-      const t3 = kspItems.filter(i => i.tier === 3).map(i => `${i.featureName}(${i.paramValue})`).join(', ');
+    if (spItems.length > 0) {
+      const t1 = spItems.filter(i => i.tier === 1).map(i => `${i.featureName}(${i.paramValue})`).join(', ');
+      const t2 = spItems.filter(i => i.tier === 2).map(i => `${i.featureName}(${i.paramValue})`).join(', ');
+      const t3 = spItems.filter(i => i.tier === 3).map(i => `${i.featureName}(${i.paramValue})`).join(', ');
       parts.push(`\nKSP T1: ${t1 || 'none'}`);
-      parts.push(`KSP T2: ${t2 || 'none'}`);
-      parts.push(`KSP T3: ${t3 || 'none'}`);
+      parts.push(`SP T2: ${t2 || 'none'}`);
+      parts.push(`SP T3: ${t3 || 'none'}`);
 
-      const packaged = kspItems.filter(i => i.l1Name);
+      const packaged = spItems.filter(i => i.l1Name);
       if (packaged.length > 0) {
         parts.push(`\nPackaging:`);
         packaged.forEach(i => {
@@ -1323,13 +1323,13 @@ export default function ProjectDetailPage() {
 
     if (researchReport) {
       parts.push(`\nResearch Report Summary: ${researchReport.summary}`);
-      if (researchReport.kspRecommendations?.length) {
-        parts.push('Research Recommendations: ' + researchReport.kspRecommendations.join('; '));
+      if (researchReport.spRecommendations?.length) {
+        parts.push('Research Recommendations: ' + researchReport.spRecommendations.join('; '));
       }
     }
 
     return parts.join('\n');
-  }, [project, analysis, kspItems, researchReport]);
+  }, [project, analysis, spItems, researchReport]);
 
   if (loading) {
     return (
@@ -1356,8 +1356,8 @@ export default function ProjectDetailPage() {
 
   // Status indicators for each section
   const compareStatus = analysis ? 'done' : 'ready';
-  const kspStatus = kspItems.length > 0 ? 'done' : hasParamData ? 'ready' : 'locked';
-  const packagingStatus = kspItems.some((i) => i.l1Name) ? 'done' : kspItems.length > 0 ? 'ready' : 'locked';
+  const spStatus = spItems.length > 0 ? 'done' : hasParamData ? 'ready' : 'locked';
+  const packagingStatus = spItems.some((i) => i.l1Name) ? 'done' : spItems.length > 0 ? 'ready' : 'locked';
 
   const statusBadge = (status: string) => {
     switch (status) {
@@ -1374,7 +1374,7 @@ export default function ProjectDetailPage() {
 
   const tabItems = [
     { key: 'compare' as const, label: t('compare.title'), icon: BarChart3, status: compareStatus },
-    { key: 'ksp' as const, label: t('ksp.title'), icon: Sparkles, status: kspStatus },
+    { key: 'ksp' as const, label: t('ksp.title'), icon: Sparkles, status: spStatus },
     { key: 'packaging' as const, label: t('packaging.title'), icon: Package, status: packagingStatus },
   ];
 
@@ -1473,7 +1473,7 @@ export default function ProjectDetailPage() {
                         filename={`${project.name}-参数对比.png`}
                         projectName={project.name}
                         activeTab="compare"
-                        kspItems={kspItems}
+                        spItems={spItems}
                         analysis={analysis}
                         segment={project.segment}
                         products={initialProducts}
@@ -1533,8 +1533,8 @@ export default function ProjectDetailPage() {
           </div>
         )}
 
-        {/* KSP tab content */}
-        {activeTab === 'ksp' && kspStatus !== 'locked' && (
+        {/* SP tab content */}
+        {activeTab === 'ksp' && spStatus !== 'locked' && (
           <div className="space-y-4">
             {/* Deep Research — animated entry point */}
             {researchReport ? (
@@ -1579,33 +1579,33 @@ export default function ProjectDetailPage() {
               </Link>
             )}
 
-            <div ref={kspExportRef}>
+            <div ref={spExportRef}>
             <TierBoard
-              items={kspItems}
+              items={spItems}
               unrankedItems={unrankedItems}
-              onItemsChange={setKspItems}
+              onItemsChange={setSpItems}
               onUnrankedChange={setUnrankedItems}
               onGenerateKsp={() => {
-                lastAnalysisKspHashRef.current = '';
+                lastAnalysisSpHashRef.current = '';
                 runAnalysisAndKsp(paramsHash);
               }}
               isGenerating={isAnalyzing}
-              onDeleteItem={handleDeleteKspItem}
+              onDeleteItem={handleDeleteSpItem}
               projectId={projectId}
               extraButtons={
                 <>
-                  <KspVersionButtons
+                  <SpVersionButtons
                     projectId={projectId}
-                    items={kspItems}
-                    onLoadVersion={setKspItems}
+                    items={spItems}
+                    onLoadVersion={setSpItems}
                     locale={locale}
                   />
                   <ExportDropdown
-                    targetRef={kspExportRef}
+                    targetRef={spExportRef}
                     filename={`${project.name}-卖点分级.png`}
                     projectName={project.name}
                     activeTab="ksp"
-                    kspItems={kspItems}
+                    spItems={spItems}
                     analysis={analysis}
                     segment={project.segment}
                     products={initialProducts}
@@ -1614,7 +1614,7 @@ export default function ProjectDetailPage() {
               }
             />
             </div>
-            {kspItems.length === 0 && (
+            {spItems.length === 0 && (
               <Card className="mt-4">
                 <CardContent className="flex flex-col items-center justify-center py-16 text-slate-400">
                   {isAnalyzing ? (
@@ -1624,7 +1624,7 @@ export default function ProjectDetailPage() {
                   )}
                   <p className="text-sm">
                     {isAnalyzing
-                      ? (locale === 'zh' ? '正在生成卖点分级...' : 'Generating KSP tiering...')
+                      ? (locale === 'zh' ? '正在生成卖点分级...' : 'Generating SP tiering...')
                       : (locale === 'zh' ? '等待参数对比生成...' : 'Waiting for generation...')}
                   </p>
                 </CardContent>
@@ -1638,10 +1638,10 @@ export default function ProjectDetailPage() {
           <div>
             <div ref={packagingExportRef}>
             <PackagingView
-              items={kspItems}
-              onGenerate={kspItems.length > 0 ? handleGeneratePackaging : undefined}
+              items={spItems}
+              onGenerate={spItems.length > 0 ? handleGeneratePackaging : undefined}
               onItemUpdate={handleItemUpdate}
-              onDeleteItem={handleDeleteKspItem}
+              onDeleteItem={handleDeleteSpItem}
               onSelectItem={setSelectedPackagingItem}
               isGenerating={isGeneratingPackaging}
               extraButtons={
@@ -1661,7 +1661,7 @@ export default function ProjectDetailPage() {
                     filename={`${project.name}-卖点包装.png`}
                     projectName={project.name}
                     activeTab="packaging"
-                    kspItems={kspItems}
+                    spItems={spItems}
                     analysis={analysis}
                     segment={project.segment}
                     products={initialProducts}
@@ -1672,16 +1672,16 @@ export default function ProjectDetailPage() {
             </div>
             {/* Prompt Architecture Preview (developer tool) */}
             <PromptPreviewPanel
-              items={kspItems}
+              items={spItems}
               productName={project.products.find(p => p.isOwnProduct)?.name || project.name}
               segment={project.segment}
               competitorContext={analysis ? JSON.stringify(analysis) : undefined}
             />
-            {kspItems.length === 0 && (
+            {spItems.length === 0 && (
               <Card className="mt-4">
                 <CardContent className="flex flex-col items-center justify-center py-16 text-slate-400">
                   <Package className="h-10 w-10 mb-4" />
-                  <p className="text-sm">{locale === 'zh' ? '请先在"卖点分级"中生成分级结果' : 'Generate KSP tiering first'}</p>
+                  <p className="text-sm">{locale === 'zh' ? '请先在"卖点分级"中生成分级结果' : 'Generate SP tiering first'}</p>
                 </CardContent>
               </Card>
             )}
@@ -1695,7 +1695,7 @@ export default function ProjectDetailPage() {
           >
             <PackagingDetailView
               item={selectedPackagingItem}
-              allItems={kspItems.filter(i => i.tier >= 1 && i.l1Name)}
+              allItems={spItems.filter(i => i.tier >= 1 && i.l1Name)}
               onBack={() => setSelectedPackagingItem(null)}
               onItemUpdate={handleItemUpdate}
               onNavigate={setSelectedPackagingItem}

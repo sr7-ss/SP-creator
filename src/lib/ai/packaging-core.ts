@@ -174,7 +174,7 @@ export async function runPackaging(params: RunPackagingParams): Promise<RunPacka
     : undefined;
 
   const researchContextBlock = researchContext
-    ? `<调研发现>\n## 调研发现（用户选择的关键结论，包装时参考）：\n${researchContext}\n</调研发现>`
+    ? `<用户调研>\n## 调研发现（用户选择的关键结论，包装时参考）：\n${researchContext}\n</用户调研>`
     : undefined;
 
   const refinementBlock = (refinementPrompt && currentPackaging)

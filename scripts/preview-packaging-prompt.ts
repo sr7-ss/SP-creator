@@ -43,7 +43,7 @@ const userPrompt = getPackagingUserPrompt({
     ],
   }),
   referenceStyleBlock: `<参考风格>\n## 上一代产品包装风格（请延续这个风格和调性，不要照抄）：\nGT 6 Pro 系列主打"档位性能王者"，文案直给、参数化、不绕弯\n</参考风格>`,
-  researchContextBlock: `<调研发现>\n## 调研发现（用户选择的关键结论，包装时参考）：\n- 用户最关心：游戏帧率稳定性（提及率 68%）\n- 用户痛点：续航焦虑，希望"一天一充"\n</调研发现>`,
+  researchContextBlock: `<用户调研>\n## 调研发现（用户选择的关键结论，包装时参考）：\n- 用户最关心：游戏帧率稳定性（提及率 68%）\n- 用户痛点：续航焦虑，希望"一天一充"\n</用户调研>`,
 });
 
 const sep = '═'.repeat(80);

@@ -43,6 +43,8 @@ export interface SpItem {
   l2SloganType?: SloganType;
   l2Alternatives?: SloganAlternative[]; // 备选 Slogan（2-3条）
   l3Details?: L3SubPoint[];
+  /** Model's chain-of-thought reasoning for this packaging decision, displayed in UI as "AI 推理" */
+  packagingThinking?: string;
   sortOrder: number;
   packagingVersions?: PackagingVersion[]; // 版本历史
 }
@@ -165,6 +167,8 @@ export interface NormalizedPackaging {
   l2SloganType: string;
   l2Alternatives?: SloganAlternative[];
   l3Details: L3SubPoint[];
+  /** Model's chain-of-thought reasoning (extracted from `_thinking` field in JSON) */
+  packagingThinking?: string;
 }
 
 // === Review Analysis ===

@@ -32,6 +32,7 @@ export async function PUT(
         l2SloganType?: string;
         l2Alternatives?: unknown;
         l3Details?: unknown;
+        packagingThinking?: string;
         sortOrder?: number;
       }>;
     };
@@ -55,6 +56,7 @@ export async function PUT(
           l2SloganType: item.l2SloganType || null,
           l2Alternatives: item.l2Alternatives ? JSON.parse(JSON.stringify(item.l2Alternatives)) : undefined,
           l3Details: item.l3Details ? JSON.parse(JSON.stringify(item.l3Details)) : undefined,
+          packagingThinking: item.packagingThinking || null,
           sortOrder: item.sortOrder ?? idx,
         })),
       }),

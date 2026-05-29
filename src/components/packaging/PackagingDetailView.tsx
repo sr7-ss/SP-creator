@@ -425,9 +425,9 @@ export default function PackagingDetailView({
         {/* Draggable divider — invisible, just the grab area */}
         <div onMouseDown={onDragStart} className="w-2 cursor-col-resize flex-shrink-0 z-10" />
 
-        {/* Right panel — AI chatbot */}
-        <div className="min-h-0 min-w-0 bg-white border-l border-slate-200 overflow-hidden" style={rightStyle}>
-          <ItemChatPanel
+        {/* Right panel — tab: AI 推理 (CoT) vs AI 助手 (chat) */}
+        <div className="min-h-0 min-w-0 bg-white border-l border-slate-200 overflow-hidden flex flex-col" style={rightStyle}>
+          <RightPanelTabs
             item={item}
             productName={productName}
             segment={segment}
@@ -441,5 +441,115 @@ export default function PackagingDetailView({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Right panel tabs: AI 推理 / AI 助手 ───────────────────────
+
+function RightPanelTabs({
+  item, productName, segment, competitorContext, projectContext, projectId,
+  onApply, locale, activeContext,
+}: {
+  item: SpItem;
+  productName: string;
+  segment?: string;
+  competitorContext?: string;
+  projectContext: string;
+  projectId: string;
+  onApply: (itemId: string, updates: Partial<SpItem>) => void;
+  locale: string;
+  activeContext?: BlockContext | null;
+}) {
+  const zh = locale === 'zh';
+  const hasThinking = !!item.packagingThinking;
+  // Default to "thinking" if reasoning exists, otherwise "chat"
+  const [tab, setTab] = useState<'thinking' | 'chat'>(hasThinking ? 'thinking' : 'chat');
+
+  // If reasoning becomes available after first render (e.g., after regenerate), auto-switch
+  useEffect(() => {
+    if (hasThinking) setTab('thinking');
+    // Intentionally only react to hasThinking transitioning to true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.packagingThinking]);
+
+  return (
+    <>
+      {/* Tab strip */}
+      <div className="flex border-b border-slate-100 flex-shrink-0">
+        <button
+          onClick={() => setTab('thinking')}
+          className={cn(
+            'flex-1 px-3 py-2.5 text-xs font-medium transition-colors',
+            tab === 'thinking'
+              ? 'text-slate-900 border-b-2 border-blue-500 bg-white'
+              : 'text-slate-400 hover:text-slate-600 border-b-2 border-transparent'
+          )}
+        >
+          {zh ? 'AI 推理' : 'AI Reasoning'}
+          {hasThinking && (
+            <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+          )}
+        </button>
+        <button
+          onClick={() => setTab('chat')}
+          className={cn(
+            'flex-1 px-3 py-2.5 text-xs font-medium transition-colors',
+            tab === 'chat'
+              ? 'text-slate-900 border-b-2 border-blue-500 bg-white'
+              : 'text-slate-400 hover:text-slate-600 border-b-2 border-transparent'
+          )}
+        >
+          {zh ? 'AI 助手' : 'AI Assistant'}
+        </button>
+      </div>
+
+      {/* Tab body */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {tab === 'thinking' ? (
+          <div className="h-full overflow-y-auto px-4 py-3">
+            {hasThinking ? (
+              <>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] uppercase tracking-wide text-slate-400 font-medium">
+                    {zh ? '本卖点 AI 思考过程' : 'AI thinking for this SP'}
+                  </span>
+                </div>
+                <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {item.packagingThinking}
+                </div>
+                <p className="mt-4 text-[10px] text-slate-400 leading-relaxed">
+                  {zh
+                    ? '这是模型生成本卖点包装前的推理。用于核对模型的思路是否符合你的产品策略。'
+                    : 'Model reasoning before producing this SP. Use it to verify the logic matches your product strategy.'}
+                </p>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center text-slate-400 px-4">
+                <div className="text-xs mb-2">
+                  {zh ? '本卖点暂无 AI 推理记录' : 'No AI reasoning recorded for this SP'}
+                </div>
+                <div className="text-[10px] leading-relaxed">
+                  {zh
+                    ? '重新生成包装即可获得 AI 的推理过程。已生成的旧数据不包含推理字段。'
+                    : 'Regenerate packaging to capture AI reasoning. Existing data has no reasoning field.'}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <ItemChatPanel
+            item={item}
+            productName={productName}
+            segment={segment}
+            competitorContext={competitorContext}
+            projectContext={projectContext}
+            projectId={projectId}
+            onApply={onApply}
+            locale={locale}
+            activeContext={activeContext}
+          />
+        )}
+      </div>
+    </>
   );
 }

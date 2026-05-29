@@ -144,6 +144,7 @@ model SpResult {
   l2SloganType    String?
   l2Alternatives  Json?   // SloganAlternative[] — {text, type}[]
   l3Details       Json?   // L3SubPoint[]
+  packagingThinking String? // model's reasoning chain for this SP (CoT), exposed in UI as "AI 推理"
   sortOrder       Int     @default(0)
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

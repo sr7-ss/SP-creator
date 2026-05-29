@@ -55,6 +55,7 @@ interface SpResultData {
   l2SloganType?: string | null;
   l2Alternatives?: unknown;
   l3Details?: string | null;
+  packagingThinking?: string | null;
   sortOrder: number;
 }
 
@@ -298,6 +299,7 @@ export default function ProjectDetailPage() {
               l2SloganType: item.l2SloganType,
               l2Alternatives: item.l2Alternatives,
               l3Details: item.l3Details,
+              packagingThinking: item.packagingThinking,
               sortOrder: idx,
             })),
           }),
@@ -419,6 +421,7 @@ export default function ProjectDetailPage() {
               ? pkg.l2Alternatives.map((a: { text?: string; type?: string }) => ({ text: String(a?.text || ''), type: String(a?.type || 'functional') })).filter((a: { text: string }) => a.text)
               : undefined,
             l3Details: newL3,
+            packagingThinking: pkg.packagingThinking ? String(pkg.packagingThinking) : undefined,
           } : i
         ));
         toast.success(locale === 'zh' ? '已重新生成' : 'Regenerated');
@@ -501,6 +504,7 @@ export default function ProjectDetailPage() {
           l2SloganType: newVersion.l2SloganType,
           l2Alternatives: newVersion.l2Alternatives,
           l3Details: newVersion.l3Details,
+          packagingThinking: pkg.packagingThinking ? String(pkg.packagingThinking) : undefined,
           packagingVersions: [...(i.packagingVersions || []), currentVersion, newVersion],
         } : i
       ));
@@ -625,6 +629,7 @@ export default function ProjectDetailPage() {
             ? (r.l2Alternatives as Array<{ text: string; type: string }>)
             : undefined,
           l3Details: r.l3Details ? (typeof r.l3Details === 'string' ? JSON.parse(r.l3Details) : r.l3Details) : undefined,
+          packagingThinking: r.packagingThinking || undefined,
           sortOrder: r.sortOrder ?? idx,
         })
       );
@@ -1109,6 +1114,7 @@ export default function ProjectDetailPage() {
                   .filter(a => a.text)
               : undefined,
             l3Details: newL3,
+            packagingThinking: typeof pkg.packagingThinking === 'string' ? pkg.packagingThinking : undefined,
           };
         });
         return merged;

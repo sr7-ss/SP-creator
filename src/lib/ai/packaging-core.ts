@@ -44,6 +44,14 @@ function normalizePkg(
 ): NormalizedPackaging {
   const p = pkg && typeof pkg === 'object' ? (pkg as Record<string, unknown>) : {};
   const rawAlts = p['l2Alternatives'] || p['l2_alternatives'] || p['alternatives'];
+  // CoT reasoning. Schema field is `_thinking` but accept `thinking` too in case
+  // the model drops the underscore.
+  const rawThinking = p['_thinking'] || p['thinking'];
+  const packagingThinking = typeof rawThinking === 'string'
+    ? rawThinking
+    : (rawThinking && typeof rawThinking === 'object'
+        ? JSON.stringify(rawThinking, null, 2)
+        : undefined);
   return {
     featureName: originalItem?.featureName || String(p['featureName'] || ''),
     tier: originalItem?.tier ?? (typeof p['tier'] === 'number' ? p['tier'] as number : 0),
@@ -59,6 +67,7 @@ function normalizePkg(
     l3Details: Array.isArray(p['l3Details'] || p['l3_details'] || p['l3'])
       ? (p['l3Details'] || p['l3_details'] || p['l3']) as NormalizedPackaging['l3Details']
       : [],
+    packagingThinking,
   };
 }
 

@@ -138,6 +138,7 @@ ${brandRulesBlock}
   "packagingResults": [
     {
       "featureName": "电池",
+      "_thinking": "Tier T1 paramLead，hint=factual 且可用极限词。电池属于'参数+营销名'模式（用户高关注+需要包装记忆点）。从典型用户场景看痛点是续航焦虑，主 Slogan 用写实型直击'价位段唯一7000mAh'这个事实卖点。L3 优先 concrete（满电追剧X小时）+ equivalent（顶2台iPhone）放大可感知性，搭配 extreme 制造记忆点。",
       "tier": 1,
       "l1Name": "7000mAh [营销名]",
       "l2Slogan": "[写实型示例：参数+极限词，结构如'价位段唯一 X mAh 大电池']",
@@ -168,6 +169,7 @@ ${brandRulesBlock}
   "packagingResults": [
     {
       "featureName": "芯片",
+      "_thinking": "Tier T1 paramLead，hint=functional（不是 factual，所以不堆芯片型号细节）。芯片用纯参数 L1 模式（型号本身就是卖点名）。功能型主推用户能长期感知的'流畅度/不卡顿'体验，避开技术词堆叠。备选 factual 用跑分给爱发烧友看，emotional 把性能跟其他维度并列做差异化。L3 全 spec 因为芯片是硬技术，用户对参数对比敏感。",
       "tier": 1,
       "l1Name": "第五代骁龙8至尊版",
       "l2Slogan": "[功能型示例：把性能参数翻译成用户可感知的长期体验，≤15字]",
@@ -203,6 +205,7 @@ ${brandRulesBlock}
   "packagingResults": [
     {
       "featureName": "与输入一致的功能名",
+      "_thinking": "在写 l1Name 之前，先用 60-120 字写出本条卖点的推理过程：(1) 读 tier 和 hint 得到的定调；(2) 从 <用户调研> 或推断的用户痛点；(3) L1 用'参数+营销名'还是纯参数的决策；(4) L2 主类型对照 hint 的检查；(5) L3 角度选取理由。务必写完 _thinking 再写后续业务字段。",
       "tier": 1,
       "l1Name": "按 L1 规则命名",
       "l2Slogan": "一句话核心卖点",
@@ -217,6 +220,8 @@ ${brandRulesBlock}
     }
   ]
 }
+
+**强制顺序**：每个 packagingResults[i] **必须以 _thinking 字段开头**，写完 _thinking 之后才能写 l1Name / l2Slogan 等业务字段。这一步不是装饰——它是让你在落笔包装之前先把思路落到 token 上的硬约束。
 </输出格式>`;
 }
 
